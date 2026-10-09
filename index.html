@@ -3036,7 +3036,8 @@ $("list").addEventListener("focusin",function(ev){
   var w=document.querySelector('.slide-wrap[data-pid="'+art.dataset.id+'"]');
   if(w && window.matchMedia("(min-width:981px)").matches){ var box=$("slides").parentNode; box.scrollTo({top:w.offsetTop-20,behavior:"smooth"}); }
 });
-$("fileOne").addEventListener("change",async function(){
+var _fileOne=$("fileOne");
+if(_fileOne) _fileOne.addEventListener("change",async function(){
   var f=this.files&&this.files[0], p=byId(imgTarget); if(!f||!p) return;
   try{
     setStatus("Lendo imagem…","",true);
@@ -3050,7 +3051,7 @@ $("fileOne").addEventListener("change",async function(){
 var sampleFn=null;
 function updateSuggestUI(){
   var show=!!sampleFn;
-  $("btnSuggestAll").hidden=!show||!S.products.length;
+  var _bsa=$("btnSuggestAll"); if(_bsa) _bsa.hidden=!show||!S.products.length;
   Array.prototype.forEach.call(document.querySelectorAll('[data-act="suggest"]'),function(b){ b.hidden=!show; });
 }
 (async function(){
@@ -3088,23 +3089,25 @@ async function suggest(ids,overwrite){
     setStatus(c==="not_granted"?"Você não autorizou o uso do Claude.":(c==="rate_limited"?"Muitos pedidos. Tente em instantes.":"Não consegui gerar sugestões."),"err");
   }
 }
-$("btnSuggestAll").addEventListener("click",function(){ suggest(S.products.map(function(p){return p.id;}),false); });
+var _bsa2=$("btnSuggestAll"); if(_bsa2) _bsa2.addEventListener("click",function(){ suggest(S.products.map(function(p){return p.id;}),false); });
 
-/* ---------- eventos gerais ---------- */
+/* ---------- eventos gerais (drop zone — ausente na versão integrada, guards aplicados) ---------- */
 var drop=$("drop"), fileIn=$("file");
-$("btnPick").addEventListener("click",function(e){ e.stopPropagation(); fileIn.click(); });
-drop.addEventListener("click",function(){ fileIn.click(); });
-drop.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fileIn.click(); } });
-fileIn.addEventListener("change",function(){ var f=this.files; addFiles(f); this.value=""; });
-["dragenter","dragover"].forEach(function(n){ window.addEventListener(n,function(e){ e.preventDefault(); if(e.dataTransfer&&Array.prototype.indexOf.call(e.dataTransfer.types||[],"Files")>=0) drop.classList.add("over"); }); });
-["dragleave","drop"].forEach(function(n){ window.addEventListener(n,function(e){ if(n==="drop"||e.target===document.documentElement||!e.relatedTarget) drop.classList.remove("over"); }); });
-window.addEventListener("drop",function(e){ e.preventDefault(); drop.classList.remove("over"); if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+if(drop && fileIn){
+  var _btnPick=$("btnPick"); if(_btnPick) _btnPick.addEventListener("click",function(e){ e.stopPropagation(); fileIn.click(); });
+  drop.addEventListener("click",function(){ fileIn.click(); });
+  drop.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fileIn.click(); } });
+  fileIn.addEventListener("change",function(){ var f=this.files; addFiles(f); this.value=""; });
+  ["dragenter","dragover"].forEach(function(n){ window.addEventListener(n,function(e){ e.preventDefault(); if(e.dataTransfer&&Array.prototype.indexOf.call(e.dataTransfer.types||[],"Files")>=0) drop.classList.add("over"); }); });
+  ["dragleave","drop"].forEach(function(n){ window.addEventListener(n,function(e){ if(n==="drop"||e.target===document.documentElement||!e.relatedTarget) drop.classList.remove("over"); }); });
+  window.addEventListener("drop",function(e){ e.preventDefault(); drop.classList.remove("over"); if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+}
 document.addEventListener("paste",function(e){
   var items=(e.clipboardData&&e.clipboardData.items)||[], files=[];
   for(var i=0;i<items.length;i++){ if(items[i].kind==="file"&&/^image\//.test(items[i].type)){ var f=items[i].getAsFile(); if(f){ try{ f=new File([f],"Imagem colada "+(S.products.length+1)+".png",{type:f.type}); }catch(x){} files.push(f); } } }
   if(files.length){ e.preventDefault(); addFiles(files); }
 });
-$("btnBlank").addEventListener("click",function(){
+var _btnBlank=$("btnBlank"); if(_btnBlank) _btnBlank.addEventListener("click",function(){
   S.products.push(newProduct({open:true})); renderList(); schedule();
   var last=$("list").lastElementChild; if(last){ var inp=last.querySelector(".f-name"); if(inp) inp.focus(); }
 });
@@ -3117,38 +3120,70 @@ $("btnReset").addEventListener("click",function(){
   renderList(); schedule(); setStatus("Tudo limpo.","");
 });
 
-/* campos de cliente e configurações */
-var bind=[
-  ["c-name",function(v){S.client.name=v;}],["c-cnpj",function(v){S.client.cnpj=v;}],
-  ["s-eyebrow",function(v){S.cover.eyebrow=v;},"cover","eyebrow"],["s-title",function(v){S.cover.title=v;},"cover","title"],["s-sub",function(v){S.cover.sub=v;},"cover","sub"],
-  ["s-name",function(v){S.seller.name=v;},"seller","name"],["s-tel",function(v){S.seller.tel=v;},"seller","tel"],["s-insta",function(v){S.seller.insta=v;},"seller","insta"],["s-company",function(v){S.seller.company=v;},"seller","company"],
-  ["s-ctitle",function(v){S.closing.title=v;},"closing","title"],["s-ctext",function(v){S.closing.text=v;},"closing","text"]
-];
-bind.forEach(function(b){
-  var el=$(b[0]); if(b[2]) el.value=S[b[2]][b[3]]; 
-  el.addEventListener("input",function(){ b[1](el.value); if(b[2]) saveSettings(); schedule(); });
-});
-$("s-preset").addEventListener("change",function(){
-  var p=PRESETS[this.value]; this.value="";
-  if(!p) return;
-  Object.assign(S.cover,p.cover); Object.assign(S.closing,p.closing);
-  $("s-eyebrow").value=S.cover.eyebrow; $("s-title").value=S.cover.title; $("s-sub").value=S.cover.sub;
-  $("s-ctitle").value=S.closing.title; $("s-ctext").value=S.closing.text;
-  saveSettings(); schedule();
-  setStatus("Textos da capa e do fechamento atualizados. Ajuste à vontade.","ok");
-});
-
-$("brandLogo").src=LOGO;
+/* bind e _brandLogo movidos para _initCatalog() */
 setTimeout(function(){
-  if(window.__pptxLoadFailed || typeof PptxGenJS==="undefined") setStatus("Não consegui carregar o gerador de PPTX (sem internet ou bloqueado). Recarregue a página.","err",true);
-  else if(window.__jspdfLoadFailed || window.__h2cLoadFailed || typeof window.jspdf==="undefined" || typeof html2canvas==="undefined") setStatus("Não consegui carregar o gerador de PDF. PPTX funciona normalmente; PDF não.","err",true);
-  else if(window.__pdfLoadFailed || typeof pdfjsLib==="undefined") setStatus("Não consegui carregar o leitor de PDF. Fotos funcionam normalmente; PDFs não.","err",true);
+  if(typeof PptxGenJS==="undefined") setStatus("Não consegui carregar o gerador de PPTX (sem internet ou bloqueado). Recarregue a página.","err",true);
+  else if(typeof window.jspdf==="undefined" || typeof html2canvas==="undefined") setStatus("Não consegui carregar o gerador de PDF. PPTX funciona normalmente; PDF não.","err",true);
 },4000);
 
-buildProductPicker();
-renderList();
-renderPreview();
-window.__genCatalog={S:S,buildSlides:buildSlides,toCatProd:toCatProd,buildProductPicker:buildProductPicker};
+/* Lazy init: só executa quando a página já está visível no DOM */
+var _catInited=false;
+function _initCatalog(){
+  if(_catInited) return; _catInited=true;
+  buildProductPicker();
+  renderList();
+  renderPreview();
+  /* preenche campos de cliente e configurações */
+  var bind=[
+    ["c-name",function(v){S.client.name=v;}],["c-cnpj",function(v){S.client.cnpj=v;}],
+    ["s-eyebrow",function(v){S.cover.eyebrow=v;},"cover","eyebrow"],["s-title",function(v){S.cover.title=v;},"cover","title"],["s-sub",function(v){S.cover.sub=v;},"cover","sub"],
+    ["s-name",function(v){S.seller.name=v;},"seller","name"],["s-tel",function(v){S.seller.tel=v;},"seller","tel"],["s-insta",function(v){S.seller.insta=v;},"seller","insta"],["s-company",function(v){S.seller.company=v;},"seller","company"],
+    ["s-ctitle",function(v){S.closing.title=v;},"closing","title"],["s-ctext",function(v){S.closing.text=v;},"closing","text"]
+  ];
+  bind.forEach(function(b){
+    var el=$(b[0]); if(!el) return; if(b[2]) el.value=S[b[2]][b[3]];
+    el.addEventListener("input",function(){ b[1](el.value); if(b[2]) saveSettings(); schedule(); });
+  });
+  var _sp=$("s-preset"); if(_sp) _sp.addEventListener("change",function(){
+    var p=PRESETS[this.value]; this.value="";
+    if(!p) return;
+    Object.assign(S.cover,p.cover); Object.assign(S.closing,p.closing);
+    var _se=$("s-eyebrow"); var _st=$("s-title"); var _ss=$("s-sub");
+    if(_se) _se.value=S.cover.eyebrow; if(_st) _st.value=S.cover.title; if(_ss) _ss.value=S.cover.sub;
+    var _sct=$("s-ctitle"); var _sctx=$("s-ctext");
+    if(_sct) _sct.value=S.closing.title; if(_sctx) _sctx.value=S.closing.text;
+    saveSettings(); schedule();
+    setStatus("Textos da capa e do fechamento atualizados. Ajuste à vontade.","ok");
+  });
+  var _exp=$("btnExport"); if(_exp) _exp.addEventListener("click",exportPPTX);
+  var _expPdf=$("btnExportPdf"); if(_expPdf) _expPdf.addEventListener("click",exportPDF);
+  var _rst=$("btnReset"); if(_rst) _rst.addEventListener("click",function(){
+    if(!S.products.length && !S.client.name && !S.client.cnpj) return;
+    if(!window.confirm("Limpar cliente e produtos? Os textos de capa, fechamento e contato são mantidos.")) return;
+    S.products=[]; S.client={name:"",cnpj:""}; var _cn=$("c-name"); var _cc=$("c-cnpj");
+    if(_cn) _cn.value=""; if(_cc) _cc.value="";
+    renderList(); schedule(); setStatus("Tudo limpo.","");
+  });
+}
+window.__genCatalog={S:S,buildSlides:buildSlides,toCatProd:toCatProd,buildProductPicker:buildProductPicker,init:_initCatalog};
+/* Inicializa imediatamente se a página já estiver visível, senão aguarda */
+if(document.getElementById("page-gen-catalogo") && document.getElementById("page-gen-catalogo").classList.contains("active")){
+  _initCatalog();
+} else {
+  /* Hook no gotoPage global para detectar abertura */
+  var _origGotoPage_cat=null;
+  var _catHook=function(){
+    var _pg=document.getElementById("page-gen-catalogo");
+    if(_pg && (_pg.classList.contains("active") || (_pg.style.display && _pg.style.display!=="none"))){
+      _initCatalog();
+    }
+  };
+  /* Polling leve até a página ser aberta (resolve problema de timing) */
+  var _catPoll=setInterval(function(){
+    var _pg=document.getElementById("page-gen-catalogo");
+    if(_pg && _pg.classList.contains("active")){ clearInterval(_catPoll); _initCatalog(); }
+  },200);
+}
 })();
 /* ===== FIM GERADOR DE CATÁLOGO ===== */
 

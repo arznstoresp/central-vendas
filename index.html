@@ -840,13 +840,13 @@ Passei aqui para retomar o contato sobre os brindes personalizados que mencionei
 Trouxe uma nova sugestão que tem saído bastante: [PRODUTO]. É prático, tem ótimo custo-benefício e já personalizamos para empresas do seu segmento.
 
 Consigo montar uma proposta rápida para você dar uma olhada. Tem interesse?`},
-  {tipo:'Cliente demonstrou interesse',emoji:'â',texto:`Ótimo, [NOME]! Fico feliz que tenha curtido.
+  {tipo:'Cliente demonstrou interesse',emoji:'✅',texto:`Ótimo, [NOME]! Fico feliz que tenha curtido.
 
 Vou montar uma sugestão completa para você com:
 📦 Produto: [PRODUTO]
 🎨 Personalização: [TIPO]
 📊 Quantidade: [QTD]
-â±ï¸ Prazo: [PRAZO]
+⏱️ Prazo: [PRAZO]
 
 Posso te mandar a proposta em PDF hoje ainda. Qual o melhor horário para falarmos?`},
   {tipo:'Envio de proposta',emoji:'📋',texto:`Olá, [NOME]! Tudo bem?
@@ -854,10 +854,10 @@ Posso te mandar a proposta em PDF hoje ainda. Qual o melhor horário para falarm
 Conforme combinamos, segue a proposta de brindes personalizados para a [EMPRESA].
 
 Na ArznStoreSP trabalhamos com:
-â Personalização exclusiva
-â Acabamento profissional
-â Qualidade garantida
-â Prazo cumprido
+✅ Personalização exclusiva
+✅ Acabamento profissional
+✅ Qualidade garantida
+✅ Prazo cumprido
 
 Qualquer dúvida estou à disposição. Podemos conversar esta semana para fechar os detalhes?`},
   {tipo:'Cliente sumiu',emoji:'🔔',texto:`Oi [NOME], tudo bem?
@@ -1020,7 +1020,7 @@ function subscribeRealtime(){
 
 function setSyncStatus(state){
   var el=document.getElementById('syncStatus'); if(!el) return;
-  var map={syncing:'🔄 Sincronizando…',ok:'🟢 Sincronizado',err:'🔴 Offline',off:'â« Local'};
+  var map={syncing:'🔄 Sincronizando…',ok:'🟢 Sincronizado',err:'🔴 Offline',off:'⚫ Local'};
   el.textContent=map[state]||state;
 }
 
@@ -1051,7 +1051,7 @@ async function syncXbzPrices(showToast){
     localStorage.setItem('cv_xbz_sync',now);
     var lbl=document.getElementById('xbzSyncLabel');
     if(lbl) lbl.textContent='Última sync: '+new Date(now).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-    if(showToast) toast('Preços XBZ atualizados: '+updated+' produtos â','ok');
+    if(showToast) toast('Preços XBZ atualizados: '+updated+' produtos ✓','ok');
     console.log('[XBZ] Preços sincronizados:',updated,'produtos');
   }catch(e){ console.warn('syncXbzPrices error',e); if(showToast) toast('Falha ao sincronizar XBZ','err'); }
 }
@@ -1302,7 +1302,7 @@ async function saveContact(){
   closeModal('modalCRM');
   renderCRM();
   document.getElementById('ds-crm').textContent=contacts.length;
-  toast(idx>=0?'Contato atualizado':'Contato salvo â','ok');
+  toast(idx>=0?'Contato atualizado':'Contato salvo ✓','ok');
 }
 async function deleteContact(id){
   if(!confirm('Excluir este contato?')) return;
@@ -1378,12 +1378,12 @@ function loadAdminArea(){
   }).join('');
   // custos + dados XBZ
   document.getElementById('adminCustoList').innerHTML=PRODUTOS.map(function(p){
-    var xbzLink=p.linkFornecedor?'<a href="'+p.linkFornecedor+'" target="_blank" style="font-size:11px;color:var(--orange)">Ver no site XBZ â</a>':'';
+    var xbzLink=p.linkFornecedor?'<a href="'+p.linkFornecedor+'" target="_blank" style="font-size:11px;color:var(--orange)">Ver no site XBZ ↗</a>':'';
     return '<div style="padding:8px 0;border-bottom:1px solid var(--border)">'
       +'<div style="font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+ic(catIc(p.cat),14,'var(--orange)')+p.nome
       +(p.codigoXbz?'<span style="font-size:11px;color:var(--dim);font-weight:400">XBZ: '+p.codigoXbz+'</span>':'')
       +xbzLink+'</div>'
-      +(p.observacaoInterna?'<div style="font-size:12px;color:var(--warn);margin-bottom:8px;padding:6px 10px;background:var(--warn-lo);border-radius:6px">â  '+esc(p.observacaoInterna)+'</div>':'')
+      +(p.observacaoInterna?'<div style="font-size:12px;color:var(--warn);margin-bottom:8px;padding:6px 10px;background:var(--warn-lo);border-radius:6px">⚠ '+esc(p.observacaoInterna)+'</div>':'')
       +'<div class="grid3" style="gap:8px">'
       +'<div class="field"><label>Custo XBZ (R$)</label><input type="number" id="ci_'+p.id+'" value="'+(p.custoInterno||'')+'" placeholder="0,00" step="0.01" oninput="calcPreco(\''+p.id+'\')" title="Preço que você paga na XBZ por unidade"></div>'
       +'<div class="field"><label>Custo pers. (R$/un)</label><input type="number" id="cp_'+p.id+'" value="'+(p.persPrice||'')+'" placeholder="0,00" step="0.01" oninput="calcPreco(\''+p.id+'\')" title="Custo de personalização por unidade (sublimação, DTF, laser...)"></div>'
@@ -1393,7 +1393,7 @@ function loadAdminArea(){
       +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
       +'<div class="field"><label style="color:var(--ok)">Nível 1 &lt;100 un<br><span style="font-size:10px;color:var(--muted);font-weight:400">45% margem</span></label><input type="number" id="pv1_'+p.id+'" value="'+(p.precoTier1||'')+'" placeholder="Auto" step="0.01" oninput="overrideTier(\''+p.id+'\',1,this.value)" style="font-weight:700;color:var(--ok)"></div>'
       +'<div class="field"><label style="color:var(--warn)">Nível 2 101–999<br><span style="font-size:10px;color:var(--muted);font-weight:400">25% margem</span></label><input type="number" id="pv2_'+p.id+'" value="'+(p.precoTier2||'')+'" placeholder="Auto" step="0.01" oninput="overrideTier(\''+p.id+'\',2,this.value)" style="font-weight:700;color:var(--warn)"></div>'
-      +'<div class="field"><label style="color:var(--info)">Nível 3 â¥1000 un<br><span style="font-size:10px;color:var(--muted);font-weight:400">15% margem</span></label><input type="number" id="pv3_'+p.id+'" value="'+(p.precoTier3||'')+'" placeholder="Auto" step="0.01" oninput="overrideTier(\''+p.id+'\',3,this.value)" style="font-weight:700;color:var(--info)"></div>'
+      +'<div class="field"><label style="color:var(--info)">Nível 3 ≥1000 un<br><span style="font-size:10px;color:var(--muted);font-weight:400">15% margem</span></label><input type="number" id="pv3_'+p.id+'" value="'+(p.precoTier3||'')+'" placeholder="Auto" step="0.01" oninput="overrideTier(\''+p.id+'\',3,this.value)" style="font-weight:700;color:var(--info)"></div>'
       +'</div>'
       +'<div style="font-size:11px;color:var(--dim);margin-top:6px">Preços calculados automaticamente pelo custo. Edite para negociação especial.</div>'
       +'</div>'
@@ -1448,7 +1448,7 @@ function getPrecoTier(p,qty){
   return p.precoTier1||p.precoFinal||0;
 }
 function tierLabel(qty){
-  if(qty>=1000) return {n:3,cor:'var(--info)',txt:'Nível 3 (â¥1000 un · 15%)'};
+  if(qty>=1000) return {n:3,cor:'var(--info)',txt:'Nível 3 (≥1000 un · 15%)'};
   if(qty>=101)  return {n:2,cor:'var(--warn)',txt:'Nível 2 (101–999 un · 25%)'};
   return {n:1,cor:'var(--ok)',txt:'Nível 1 (<100 un · 45%)'};
 }
@@ -1466,7 +1466,7 @@ function savePrecos(){
     precos[p.id]={ci:ci,cp:cp,pv1:pv1,pv2:pv2,pv3:pv3};
   });
   localStorage.setItem('cv_precos',JSON.stringify(precos));
-  toast('Preços salvos â','ok');
+  toast('Preços salvos ✓','ok');
 }
 function loadPrecos(){
   var precos=JSON.parse(localStorage.getItem('cv_precos')||'{}');
@@ -1489,7 +1489,7 @@ function saveAdminConfig(){
   localStorage.setItem('cv_vendedora_nome',fn);
   localStorage.setItem('cv_alan_wa',aw);
   if(sp) localStorage.setItem('cv_admin_pwd',sp);
-  toast('Configurações salvas â','ok');
+  toast('Configurações salvas ✓','ok');
 }
 
 // ====================== CATÁLOGO ======================

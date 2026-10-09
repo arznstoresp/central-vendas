@@ -375,8 +375,8 @@ select option{background:var(--surface2)}
     <button class="nav-btn" onclick="gotoPage('admin',this)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="lock" aria-hidden="true" class="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Admin</button>
   </nav>
   <div class="sidebar-footer">
-    ArznStoreSP Â© 2026
-    <div id="syncStatus" style="margin-top:4px;font-size:10px;opacity:.7">ð¢ Sincronizado</div>
+    ArznStoreSP © 2026
+    <div id="syncStatus" style="margin-top:4px;font-size:10px;opacity:.7">🟢 Sincronizado</div>
   </div>
 </aside>
 
@@ -582,7 +582,7 @@ select option{background:var(--surface2)}
       </div>
       <div class="prog-bar"><div class="prog-fill" id="progBar" style="width:0%"></div></div>
     </div>
-    <div id="dayList" class="stack"><div class="week-header" style="background:linear-gradient(135deg,#D14203,var(--orange))">Semana 1 — Prospecção inicial</div><div class="day-card" id="day-1"><div class="day-head" onclick="toggleDay(1)"><div class="day-num">1</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Montar lista de 15 empresas</div><div style="font-size:11px;color:var(--dim)">Caneta Â· Adesivo Â· Sacola TNT</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(1)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: 15 empresas cadastradas no CRM com nome, segmento e WhatsApp. Use Google Maps buscando "academias perto de mim", "escritórios", "restaurantes". Salve no CRM com status "Novo lead".</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> 15 contatos salvos.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Caneta</span><span class="chip muted" style="margin:2px">Adesivo</span><span class="chip muted" style="margin:2px">Sacola TNT</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(1,this.value)"></textarea></div></div><div class="day-card" id="day-2"><div class="day-head" onclick="toggleDay(2)"><div class="day-num">2</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Classificar e priorizar leads</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(2)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: definir os 10 melhores alvos da semana. Abra o CRM e marque o segmento de cada um (academia, escritório, comércio...). Priorize quem tem Instagram ativo ou WhatsApp Business — sinal de que cuida da imagem da marca.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os 15 têm segmento e os 10 prioritários estão marcados.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(2,this.value)"></textarea></div></div><div class="day-card" id="day-3"><div class="day-head" onclick="toggleDay(3)"><div class="day-num">3</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Enviar 5 primeiras abordagens</div><div style="font-size:11px;color:var(--dim)">Caneta Â· Squeeze Â· Sacola TNT</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(3)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: 5 mensagens enviadas. Acesse a aba Textos, copie o texto "Primeira abordagem" e personalize com o nome da empresa. Envie pelo WhatsApp pessoal. Registre no CRM como "Contatado". Horário ideal: entre 9h e 11h.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> 5 enviadas e registradas.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Caneta</span><span class="chip muted" style="margin:2px">Squeeze</span><span class="chip muted" style="margin:2px">Sacola TNT</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(3,this.value)"></textarea></div></div><div class="day-card" id="day-4"><div class="day-head" onclick="toggleDay(4)"><div class="day-num">4</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Enviar 5 novas abordagens</div><div style="font-size:11px;color:var(--dim)">Caneca Â· Mousepad</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(4)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: total de 10 mensagens enviadas no ciclo. Continue com os 5 contatos restantes da lista prioritária. Se alguém já respondeu ontem, responda primeiro antes de enviar novas. Atualize o CRM com o status de cada um.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> mais 5 enviadas.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Caneca</span><span class="chip muted" style="margin:2px">Mousepad</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(4,this.value)"></textarea></div></div><div class="day-card" id="day-5"><div class="day-head" onclick="toggleDay(5)"><div class="day-num">5</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Organizar respostas e agendar retornos</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(5)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: zero resposta sem próximo passo. Abra o CRM e para quem respondeu: registre o interesse e defina data de follow-up. Para quem não respondeu: marque como "Aguardando". Separe os interessados dos que pediram "mais tarde".</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os 10 contatos têm próximo passo definido.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(5,this.value)"></textarea></div></div><div class="day-card" id="day-6"><div class="day-head" onclick="toggleDay(6)"><div class="day-num">6</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Follow-up dos que não responderam</div><div style="font-size:11px;color:var(--dim)">Adesivo Â· Copo</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(6)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: reenviar para os silenciosos. Acesse a aba Textos, use o texto "Follow-up 1" para quem ainda não respondeu (não envie para quem já respondeu). Mude apenas a abertura para não parecer cópia. Horário ideal: 14h-16h.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> follow-up enviado para todos que estão "Aguardando".</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Adesivo</span><span class="chip muted" style="margin:2px">Copo</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(6,this.value)"></textarea></div></div><div class="day-card" id="day-7"><div class="day-head" onclick="toggleDay(7)"><div class="day-num">7</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Revisão da semana 1</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(7)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: entender o que funcionou. Anote: quantas mensagens enviadas, quantas respostas, quantos interessados. Revise os textos que mais geraram resposta — repita-os na semana 2. Se tiver interessados prontos para proposta, já passe para a aba Proposta. Compartilhe os números com Alan no WhatsApp.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> resumo enviado.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(7,this.value)"></textarea></div></div><div class="week-header" style="background:linear-gradient(135deg,#D14203,var(--orange))">Semana 2 — Qualificação e sugestões por segmento</div><div class="day-card" id="day-8"><div class="day-head" onclick="toggleDay(8)"><div class="day-num">8</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Sugestões para academias e fitness</div><div style="font-size:11px;color:var(--dim)">Squeeze Â· Garrafa térmica Â· Camiseta dry fit</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(8)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: enviar sugestões para todos os contatos de academia/fitness. Use a aba Catálogo, filtre por "Academia". Copie a Proposta com: Squeeze 500ml, Garrafa térmica, Camiseta dry fit. Personalize com o nome da academia. Mensagem na aba Textos: "Sugestão por segmento".</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos da academia receberam sugestão.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Squeeze</span><span class="chip muted" style="margin:2px">Garrafa térmica</span><span class="chip muted" style="margin:2px">Camiseta dry fit</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(8,this.value)"></textarea></div></div><div class="day-card" id="day-9"><div class="day-head" onclick="toggleDay(9)"><div class="day-num">9</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Sugestões para escritórios e clínicas</div><div style="font-size:11px;color:var(--dim)">Caneta Â· Caderno Â· Kit onboarding</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(9)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: enviar sugestões para escritórios, clínicas e imobiliárias. Produtos: Caneta personalizada, Caderno executivo, Kit onboarding. Destaque o prazo rápido e a mínima acessível (50 canetas).</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos do segmento escritório receberam proposta.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Caneta</span><span class="chip muted" style="margin:2px">Caderno</span><span class="chip muted" style="margin:2px">Kit onboarding</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(9,this.value)"></textarea></div></div><div class="day-card" id="day-10"><div class="day-head" onclick="toggleDay(10)"><div class="day-num">10</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Sugestões para comércio e varejo</div><div style="font-size:11px;color:var(--dim)">Sacola TNT Â· Ecobag Â· Camiseta</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(10)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: abordar lojas, restaurantes, salões e mercados. Produtos ideais: Sacola TNT, Ecobag, Camiseta com logo. Argumento: cliente sai com a sacola personalizada na mão — propaganda grátis na rua.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos do segmento comércio receberam sugestão.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Sacola TNT</span><span class="chip muted" style="margin:2px">Ecobag</span><span class="chip muted" style="margin:2px">Camiseta</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(10,this.value)"></textarea></div></div><div class="day-card" id="day-11"><div class="day-head" onclick="toggleDay(11)"><div class="day-num">11</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Adicionar 10 novos leads ao CRM</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(11)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: a lista não pode parar. Pesquise 10 novos contatos para não ficar sem leads no fim da semana 3. Use Instagram, Google Maps, indicações de quem já respondeu. Cadastre no CRM como "Novo lead".</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> +10 cadastros feitos.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(11,this.value)"></textarea></div></div><div class="day-card" id="day-12"><div class="day-head" onclick="toggleDay(12)"><div class="day-num">12</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Montar propostas para os interessados</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(12)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: pelo menos 2 propostas enviadas. Abra a aba Proposta, selecione os produtos, informe o nome do cliente e gere a mensagem. Envie pelo WhatsApp. Registre no CRM como "Proposta enviada" com data de hoje.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> 2 ou mais propostas geradas e enviadas.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(12,this.value)"></textarea></div></div><div class="day-card" id="day-13"><div class="day-head" onclick="toggleDay(13)"><div class="day-num">13</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Follow-up das propostas enviadas</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(13)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: checar quem recebeu a proposta e não respondeu. Se passaram 2 dias, envie o follow-up de "verificação" da aba Textos. Não pressione — pergunte se surgiu dúvida ou se precisa de ajuste na quantidade.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos com proposta enviada há 2+ dias receberam follow-up.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(13,this.value)"></textarea></div></div><div class="day-card" id="day-14"><div class="day-head" onclick="toggleDay(14)"><div class="day-num">14</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Revisão semana 2</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(14)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: medir evolução. Quantas propostas enviadas? Quantas respostas positivas? Quem está mais perto de fechar? Atualize o CRM, mova os quentes para status "Negociando". Anote o que pretende fazer diferente na semana 3 e compartilhe com Alan.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> CRM atualizado e resumo enviado.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(14,this.value)"></textarea></div></div><div class="week-header" style="background:linear-gradient(135deg,#1D4ED8,var(--orange))">Semana 3 — Negociação e produtos de maior valor</div><div class="day-card" id="day-15"><div class="day-head" onclick="toggleDay(15)"><div class="day-num">15</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Enviar proposta completa aos quentes</div><div style="font-size:11px;color:var(--dim)">Kit onboarding Â· Kit executivo</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(15)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: propostas detalhadas para os 3 leads mais interessados. Use a aba Proposta com todos os produtos discutidos. Inclua prazo, mínimo e personalização. Esses clientes já confiam — apresente o valor total.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> 3 propostas completas enviadas.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Kit onboarding</span><span class="chip muted" style="margin:2px">Kit executivo</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(15,this.value)"></textarea></div></div><div class="day-card" id="day-16"><div class="day-head" onclick="toggleDay(16)"><div class="day-num">16</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Apresentar kits corporativos</div><div style="font-size:11px;color:var(--dim)">Kit onboarding</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(16)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: apresentar kits para empresas com 20+ funcionários. Kit Onboarding (caneta + caderno + caneca) e Kit Executivo são ideais. Argumento: "O colaborador recebe no primeiro dia e já veste a marca."</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> pelo menos 2 empresas receberam a apresentação de kit.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Kit onboarding</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(16,this.value)"></textarea></div></div><div class="day-card" id="day-17"><div class="day-head" onclick="toggleDay(17)"><div class="day-num">17</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Oferecer produto premium a quem avançou</div><div style="font-size:11px;color:var(--dim)">Garrafa inox Â· Power bank</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(17)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: upgrade para clientes que já compraram ou estão quase fechando. Garrafa inox, Power bank ou Kit executivo premium. "Você já aprovou a caneta — o kit completo fica com um visual muito mais profissional."</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> 2 tentativas de upgrade feitas.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Garrafa inox</span><span class="chip muted" style="margin:2px">Power bank</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(17,this.value)"></textarea></div></div><div class="day-card" id="day-18"><div class="day-head" onclick="toggleDay(18)"><div class="day-num">18</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Reativar quem ficou frio</div><div style="font-size:11px;color:var(--dim)">Caneca Â· Squeeze Â· Caneta</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(18)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: última tentativa para os "Aguardando" da semana 1. Use o texto de reativação da aba Textos. Se não responder em 2 dias, arquive no CRM. Não insista — anote para tentar em 60 dias.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> reativação enviada para todos que estão parados há 7+ dias.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Caneca</span><span class="chip muted" style="margin:2px">Squeeze</span><span class="chip muted" style="margin:2px">Caneta</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(18,this.value)"></textarea></div></div><div class="day-card" id="day-19"><div class="day-head" onclick="toggleDay(19)"><div class="day-num">19</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Negociar quantidade e prazo</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(19)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: ajudar o cliente indeciso a tomar a decisão. Pergunte: "Quantas unidades você precisa para essa ação?" e "Qual seria o prazo ideal?" Quem define quantidade entra em modo de compra. Ofereça desconto progressivo se aumentar o pedido.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os "Negociando" têm quantidade e prazo definidos.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(19,this.value)"></textarea></div></div><div class="day-card" id="day-20"><div class="day-head" onclick="toggleDay(20)"><div class="day-num">20</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Confirmar pedidos e coletar arte/logo</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(20)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: pedidos confirmados precisam de logo. Peça o arquivo da logo no melhor formato disponível (PNG fundo branco ou vetor). Explique que a arte vai para aprovação antes de produzir. Anote no CRM: "Logo recebida" ou "Aguardando logo".</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os pedidos confirmados têm logo em mãos.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(20,this.value)"></textarea></div></div><div class="day-card" id="day-21"><div class="day-head" onclick="toggleDay(21)"><div class="day-num">21</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Revisão semana 3</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(21)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: fechar o raio-X de vendas. Quantos pedidos confirmados? Quantos em arte/aprovação? Quantos perdidos? Quem ainda pode fechar na semana 4? Mova no CRM: confirmados vão para "Fechado", os demais para "Negociando". Envie resumo para Alan.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> CRM atualizado e resumo enviado.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(21,this.value)"></textarea></div></div><div class="week-header" style="background:linear-gradient(135deg,#059669,var(--orange))">Semana 4 — Fechamento e pós-venda</div><div class="day-card" id="day-22"><div class="day-head" onclick="toggleDay(22)"><div class="day-num">22</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Fechar pedidos que ainda estão abertos</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(22)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: empurrar os indecisos para uma decisão. Ligue (não mande texto) para os 2 mais quentes. Fale: "Fiz o orçamento final — posso confirmar hoje para garantir o prazo." Quem quer mas não respondeu ao texto muitas vezes responde ao telefone.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os indecisos foram contatados por ligação ou mensagem forte.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(22,this.value)"></textarea></div></div><div class="day-card" id="day-23"><div class="day-head" onclick="toggleDay(23)"><div class="day-num">23</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Usar quantidade como argumento de fechamento</div><div style="font-size:11px;color:var(--dim)">Caneta Â· Squeeze Â· Sacola TNT</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(23)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: converter o indeciso com gatilho de volume. "Você disse que tinha interesse em 50 peças — se fecharmos essa semana, consigo priorizar na fila de produção."</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> pelo menos 1 pedido convertido com esse argumento.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Caneta</span><span class="chip muted" style="margin:2px">Squeeze</span><span class="chip muted" style="margin:2px">Sacola TNT</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(23,this.value)"></textarea></div></div><div class="day-card" id="day-24"><div class="day-head" onclick="toggleDay(24)"><div class="day-num">24</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Último follow-up antes de arquivar</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(24)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: limpar a fila. Quem está "Aguardando" há 14+ dias recebe a última mensagem: "Vou fechar a agenda dessa semana — ainda faz sentido conversarmos sobre os brindes?" Se não responder, mova para "Arquivado" no CRM.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os inativos receberam a mensagem final.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(24,this.value)"></textarea></div></div><div class="day-card" id="day-25"><div class="day-head" onclick="toggleDay(25)"><div class="day-num">25</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Pós-venda e pedido de avaliação</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(25)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: fortalecer o relacionamento pós-entrega. Para quem já recebeu os produtos: envie o texto de pós-venda da aba Textos. Peça avaliação no Google ou uma foto usando o brinde — isso gera prova social para futuras abordagens.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os pedidos entregues receberam mensagem de pós-venda.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(25,this.value)"></textarea></div></div><div class="day-card" id="day-26"><div class="day-head" onclick="toggleDay(26)"><div class="day-num">26</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Montar lista do próximo ciclo</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(26)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: garantir que o mês 2 começa com combustível. Liste: quem disse "não agora mas em 30 dias", quem tem evento planejado nos próximos 2 meses, indicações recebidas este mês. Cadastre no CRM como "Lead futuro". Meta: 15 contatos prontos para o próximo ciclo.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> lista montada.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(26,this.value)"></textarea></div></div><div class="day-card" id="day-27"><div class="day-head" onclick="toggleDay(27)"><div class="day-num">27</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Prospectar 10 novos leads para o mês 2</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(27)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: começar o próximo ciclo ainda hoje. Pesquise 10 novas empresas que ainda não foram contatadas. Priorize setores que deram mais resultado este mês. Cadastre no CRM.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> 10 novos leads adicionados.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(27,this.value)"></textarea></div></div><div class="day-card" id="day-28"><div class="day-head" onclick="toggleDay(28)"><div class="day-num">28</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Revisão final + relatório do mês</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(28)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: montar o resumo completo do mês. Anote: total de abordagens, respostas recebidas, propostas enviadas, pedidos fechados e valor total gerado. Compare com a meta inicial. Identifique os 3 textos que mais converteram e os 3 produtos mais citados. Envie o relatório completo para Alan.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> relatório enviado e CRM 100% atualizado.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(28,this.value)"></textarea></div></div><div class="week-header" style="background:linear-gradient(135deg,#7C3AED,var(--orange))">Semana 5 — Consolidação do mês</div><div class="day-card" id="day-29"><div class="day-head" onclick="toggleDay(29)"><div class="day-num">29</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Organizar carteira para o próximo mês</div><div style="font-size:11px;color:var(--dim)">Kits personalizados Â· Caneta Â· Squeeze Â· Sacola TNT</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(29)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: deixar a carteira de clientes organizada e pronta para o próximo ciclo. Revise todos os contatos do CRM: mova os inativos para "Arquivado", confirme os "Lead futuro" com data prevista de retorno e atualize as observações com o que cada cliente comentou. Prepare uma lista dos 10 clientes com maior potencial para priorizar nas primeiras abordagens do próximo mês.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> CRM 100% atualizado e lista dos 10 prioritários salva.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Kits personalizados</span><span class="chip muted" style="margin:2px">Caneta</span><span class="chip muted" style="margin:2px">Squeeze</span><span class="chip muted" style="margin:2px">Sacola TNT</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(29,this.value)"></textarea></div></div><div class="day-card" id="day-30"><div class="day-head" onclick="toggleDay(30)"><div class="day-num">30</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Relatório final e plano de ação</div><div style="font-size:11px;color:var(--dim)">Kits personalizados Â· Garrafa térmica Â· Caneca Â· Squeeze</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(30)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: consolidar os aprendizados do mês e definir o próximo passo. Monte um relatório com: produtos mais solicitados, segmentos com maior retorno, textos que mais geraram resposta, objeções mais comuns e como superou cada uma. Com esses dados, defina os 3 produtos prioritários para o mês 2 e as 3 estratégias de abordagem que mais funcionaram. Compartilhe com Alan.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> relatório enviado e mês 2 planejado.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Kits personalizados</span><span class="chip muted" style="margin:2px">Garrafa térmica</span><span class="chip muted" style="margin:2px">Caneca</span><span class="chip muted" style="margin:2px">Squeeze</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(30,this.value)"></textarea></div></div></div>
+    <div id="dayList" class="stack"><div class="week-header" style="background:linear-gradient(135deg,#D14203,var(--orange))">Semana 1 — Prospecção inicial</div><div class="day-card" id="day-1"><div class="day-head" onclick="toggleDay(1)"><div class="day-num">1</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Montar lista de 15 empresas</div><div style="font-size:11px;color:var(--dim)">Caneta · Adesivo · Sacola TNT</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(1)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: 15 empresas cadastradas no CRM com nome, segmento e WhatsApp. Use Google Maps buscando "academias perto de mim", "escritórios", "restaurantes". Salve no CRM com status "Novo lead".</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> 15 contatos salvos.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Caneta</span><span class="chip muted" style="margin:2px">Adesivo</span><span class="chip muted" style="margin:2px">Sacola TNT</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(1,this.value)"></textarea></div></div><div class="day-card" id="day-2"><div class="day-head" onclick="toggleDay(2)"><div class="day-num">2</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Classificar e priorizar leads</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(2)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: definir os 10 melhores alvos da semana. Abra o CRM e marque o segmento de cada um (academia, escritório, comércio...). Priorize quem tem Instagram ativo ou WhatsApp Business — sinal de que cuida da imagem da marca.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os 15 têm segmento e os 10 prioritários estão marcados.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(2,this.value)"></textarea></div></div><div class="day-card" id="day-3"><div class="day-head" onclick="toggleDay(3)"><div class="day-num">3</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Enviar 5 primeiras abordagens</div><div style="font-size:11px;color:var(--dim)">Caneta · Squeeze · Sacola TNT</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(3)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: 5 mensagens enviadas. Acesse a aba Textos, copie o texto "Primeira abordagem" e personalize com o nome da empresa. Envie pelo WhatsApp pessoal. Registre no CRM como "Contatado". Horário ideal: entre 9h e 11h.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> 5 enviadas e registradas.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Caneta</span><span class="chip muted" style="margin:2px">Squeeze</span><span class="chip muted" style="margin:2px">Sacola TNT</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(3,this.value)"></textarea></div></div><div class="day-card" id="day-4"><div class="day-head" onclick="toggleDay(4)"><div class="day-num">4</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Enviar 5 novas abordagens</div><div style="font-size:11px;color:var(--dim)">Caneca · Mousepad</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(4)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: total de 10 mensagens enviadas no ciclo. Continue com os 5 contatos restantes da lista prioritária. Se alguém já respondeu ontem, responda primeiro antes de enviar novas. Atualize o CRM com o status de cada um.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> mais 5 enviadas.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Caneca</span><span class="chip muted" style="margin:2px">Mousepad</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(4,this.value)"></textarea></div></div><div class="day-card" id="day-5"><div class="day-head" onclick="toggleDay(5)"><div class="day-num">5</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Organizar respostas e agendar retornos</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(5)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: zero resposta sem próximo passo. Abra o CRM e para quem respondeu: registre o interesse e defina data de follow-up. Para quem não respondeu: marque como "Aguardando". Separe os interessados dos que pediram "mais tarde".</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os 10 contatos têm próximo passo definido.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(5,this.value)"></textarea></div></div><div class="day-card" id="day-6"><div class="day-head" onclick="toggleDay(6)"><div class="day-num">6</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Follow-up dos que não responderam</div><div style="font-size:11px;color:var(--dim)">Adesivo · Copo</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(6)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: reenviar para os silenciosos. Acesse a aba Textos, use o texto "Follow-up 1" para quem ainda não respondeu (não envie para quem já respondeu). Mude apenas a abertura para não parecer cópia. Horário ideal: 14h-16h.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> follow-up enviado para todos que estão "Aguardando".</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Adesivo</span><span class="chip muted" style="margin:2px">Copo</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(6,this.value)"></textarea></div></div><div class="day-card" id="day-7"><div class="day-head" onclick="toggleDay(7)"><div class="day-num">7</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Revisão da semana 1</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(7)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: entender o que funcionou. Anote: quantas mensagens enviadas, quantas respostas, quantos interessados. Revise os textos que mais geraram resposta — repita-os na semana 2. Se tiver interessados prontos para proposta, já passe para a aba Proposta. Compartilhe os números com Alan no WhatsApp.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> resumo enviado.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(7,this.value)"></textarea></div></div><div class="week-header" style="background:linear-gradient(135deg,#D14203,var(--orange))">Semana 2 — Qualificação e sugestões por segmento</div><div class="day-card" id="day-8"><div class="day-head" onclick="toggleDay(8)"><div class="day-num">8</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Sugestões para academias e fitness</div><div style="font-size:11px;color:var(--dim)">Squeeze · Garrafa térmica · Camiseta dry fit</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(8)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: enviar sugestões para todos os contatos de academia/fitness. Use a aba Catálogo, filtre por "Academia". Copie a Proposta com: Squeeze 500ml, Garrafa térmica, Camiseta dry fit. Personalize com o nome da academia. Mensagem na aba Textos: "Sugestão por segmento".</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos da academia receberam sugestão.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Squeeze</span><span class="chip muted" style="margin:2px">Garrafa térmica</span><span class="chip muted" style="margin:2px">Camiseta dry fit</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(8,this.value)"></textarea></div></div><div class="day-card" id="day-9"><div class="day-head" onclick="toggleDay(9)"><div class="day-num">9</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Sugestões para escritórios e clínicas</div><div style="font-size:11px;color:var(--dim)">Caneta · Caderno · Kit onboarding</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(9)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: enviar sugestões para escritórios, clínicas e imobiliárias. Produtos: Caneta personalizada, Caderno executivo, Kit onboarding. Destaque o prazo rápido e a mínima acessível (50 canetas).</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos do segmento escritório receberam proposta.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Caneta</span><span class="chip muted" style="margin:2px">Caderno</span><span class="chip muted" style="margin:2px">Kit onboarding</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(9,this.value)"></textarea></div></div><div class="day-card" id="day-10"><div class="day-head" onclick="toggleDay(10)"><div class="day-num">10</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Sugestões para comércio e varejo</div><div style="font-size:11px;color:var(--dim)">Sacola TNT · Ecobag · Camiseta</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(10)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: abordar lojas, restaurantes, salões e mercados. Produtos ideais: Sacola TNT, Ecobag, Camiseta com logo. Argumento: cliente sai com a sacola personalizada na mão — propaganda grátis na rua.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos do segmento comércio receberam sugestão.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Sacola TNT</span><span class="chip muted" style="margin:2px">Ecobag</span><span class="chip muted" style="margin:2px">Camiseta</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(10,this.value)"></textarea></div></div><div class="day-card" id="day-11"><div class="day-head" onclick="toggleDay(11)"><div class="day-num">11</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Adicionar 10 novos leads ao CRM</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(11)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: a lista não pode parar. Pesquise 10 novos contatos para não ficar sem leads no fim da semana 3. Use Instagram, Google Maps, indicações de quem já respondeu. Cadastre no CRM como "Novo lead".</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> +10 cadastros feitos.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(11,this.value)"></textarea></div></div><div class="day-card" id="day-12"><div class="day-head" onclick="toggleDay(12)"><div class="day-num">12</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Montar propostas para os interessados</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(12)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: pelo menos 2 propostas enviadas. Abra a aba Proposta, selecione os produtos, informe o nome do cliente e gere a mensagem. Envie pelo WhatsApp. Registre no CRM como "Proposta enviada" com data de hoje.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> 2 ou mais propostas geradas e enviadas.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(12,this.value)"></textarea></div></div><div class="day-card" id="day-13"><div class="day-head" onclick="toggleDay(13)"><div class="day-num">13</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Follow-up das propostas enviadas</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(13)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: checar quem recebeu a proposta e não respondeu. Se passaram 2 dias, envie o follow-up de "verificação" da aba Textos. Não pressione — pergunte se surgiu dúvida ou se precisa de ajuste na quantidade.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos com proposta enviada há 2+ dias receberam follow-up.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(13,this.value)"></textarea></div></div><div class="day-card" id="day-14"><div class="day-head" onclick="toggleDay(14)"><div class="day-num">14</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Revisão semana 2</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(14)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: medir evolução. Quantas propostas enviadas? Quantas respostas positivas? Quem está mais perto de fechar? Atualize o CRM, mova os quentes para status "Negociando". Anote o que pretende fazer diferente na semana 3 e compartilhe com Alan.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> CRM atualizado e resumo enviado.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(14,this.value)"></textarea></div></div><div class="week-header" style="background:linear-gradient(135deg,#1D4ED8,var(--orange))">Semana 3 — Negociação e produtos de maior valor</div><div class="day-card" id="day-15"><div class="day-head" onclick="toggleDay(15)"><div class="day-num">15</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Enviar proposta completa aos quentes</div><div style="font-size:11px;color:var(--dim)">Kit onboarding · Kit executivo</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(15)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: propostas detalhadas para os 3 leads mais interessados. Use a aba Proposta com todos os produtos discutidos. Inclua prazo, mínimo e personalização. Esses clientes já confiam — apresente o valor total.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> 3 propostas completas enviadas.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Kit onboarding</span><span class="chip muted" style="margin:2px">Kit executivo</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(15,this.value)"></textarea></div></div><div class="day-card" id="day-16"><div class="day-head" onclick="toggleDay(16)"><div class="day-num">16</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Apresentar kits corporativos</div><div style="font-size:11px;color:var(--dim)">Kit onboarding</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(16)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: apresentar kits para empresas com 20+ funcionários. Kit Onboarding (caneta + caderno + caneca) e Kit Executivo são ideais. Argumento: "O colaborador recebe no primeiro dia e já veste a marca."</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> pelo menos 2 empresas receberam a apresentação de kit.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Kit onboarding</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(16,this.value)"></textarea></div></div><div class="day-card" id="day-17"><div class="day-head" onclick="toggleDay(17)"><div class="day-num">17</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Oferecer produto premium a quem avançou</div><div style="font-size:11px;color:var(--dim)">Garrafa inox · Power bank</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(17)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: upgrade para clientes que já compraram ou estão quase fechando. Garrafa inox, Power bank ou Kit executivo premium. "Você já aprovou a caneta — o kit completo fica com um visual muito mais profissional."</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> 2 tentativas de upgrade feitas.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Garrafa inox</span><span class="chip muted" style="margin:2px">Power bank</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(17,this.value)"></textarea></div></div><div class="day-card" id="day-18"><div class="day-head" onclick="toggleDay(18)"><div class="day-num">18</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Reativar quem ficou frio</div><div style="font-size:11px;color:var(--dim)">Caneca · Squeeze · Caneta</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(18)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: última tentativa para os "Aguardando" da semana 1. Use o texto de reativação da aba Textos. Se não responder em 2 dias, arquive no CRM. Não insista — anote para tentar em 60 dias.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> reativação enviada para todos que estão parados há 7+ dias.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Caneca</span><span class="chip muted" style="margin:2px">Squeeze</span><span class="chip muted" style="margin:2px">Caneta</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(18,this.value)"></textarea></div></div><div class="day-card" id="day-19"><div class="day-head" onclick="toggleDay(19)"><div class="day-num">19</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Negociar quantidade e prazo</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(19)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: ajudar o cliente indeciso a tomar a decisão. Pergunte: "Quantas unidades você precisa para essa ação?" e "Qual seria o prazo ideal?" Quem define quantidade entra em modo de compra. Ofereça desconto progressivo se aumentar o pedido.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os "Negociando" têm quantidade e prazo definidos.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(19,this.value)"></textarea></div></div><div class="day-card" id="day-20"><div class="day-head" onclick="toggleDay(20)"><div class="day-num">20</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Confirmar pedidos e coletar arte/logo</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(20)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: pedidos confirmados precisam de logo. Peça o arquivo da logo no melhor formato disponível (PNG fundo branco ou vetor). Explique que a arte vai para aprovação antes de produzir. Anote no CRM: "Logo recebida" ou "Aguardando logo".</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os pedidos confirmados têm logo em mãos.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(20,this.value)"></textarea></div></div><div class="day-card" id="day-21"><div class="day-head" onclick="toggleDay(21)"><div class="day-num">21</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Revisão semana 3</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(21)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: fechar o raio-X de vendas. Quantos pedidos confirmados? Quantos em arte/aprovação? Quantos perdidos? Quem ainda pode fechar na semana 4? Mova no CRM: confirmados vão para "Fechado", os demais para "Negociando". Envie resumo para Alan.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> CRM atualizado e resumo enviado.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(21,this.value)"></textarea></div></div><div class="week-header" style="background:linear-gradient(135deg,#059669,var(--orange))">Semana 4 — Fechamento e pós-venda</div><div class="day-card" id="day-22"><div class="day-head" onclick="toggleDay(22)"><div class="day-num">22</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Fechar pedidos que ainda estão abertos</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(22)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: empurrar os indecisos para uma decisão. Ligue (não mande texto) para os 2 mais quentes. Fale: "Fiz o orçamento final — posso confirmar hoje para garantir o prazo." Quem quer mas não respondeu ao texto muitas vezes responde ao telefone.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os indecisos foram contatados por ligação ou mensagem forte.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(22,this.value)"></textarea></div></div><div class="day-card" id="day-23"><div class="day-head" onclick="toggleDay(23)"><div class="day-num">23</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Usar quantidade como argumento de fechamento</div><div style="font-size:11px;color:var(--dim)">Caneta · Squeeze · Sacola TNT</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(23)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: converter o indeciso com gatilho de volume. "Você disse que tinha interesse em 50 peças — se fecharmos essa semana, consigo priorizar na fila de produção."</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> pelo menos 1 pedido convertido com esse argumento.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Caneta</span><span class="chip muted" style="margin:2px">Squeeze</span><span class="chip muted" style="margin:2px">Sacola TNT</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(23,this.value)"></textarea></div></div><div class="day-card" id="day-24"><div class="day-head" onclick="toggleDay(24)"><div class="day-num">24</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Último follow-up antes de arquivar</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(24)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: limpar a fila. Quem está "Aguardando" há 14+ dias recebe a última mensagem: "Vou fechar a agenda dessa semana — ainda faz sentido conversarmos sobre os brindes?" Se não responder, mova para "Arquivado" no CRM.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os inativos receberam a mensagem final.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(24,this.value)"></textarea></div></div><div class="day-card" id="day-25"><div class="day-head" onclick="toggleDay(25)"><div class="day-num">25</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Pós-venda e pedido de avaliação</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(25)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: fortalecer o relacionamento pós-entrega. Para quem já recebeu os produtos: envie o texto de pós-venda da aba Textos. Peça avaliação no Google ou uma foto usando o brinde — isso gera prova social para futuras abordagens.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> todos os pedidos entregues receberam mensagem de pós-venda.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(25,this.value)"></textarea></div></div><div class="day-card" id="day-26"><div class="day-head" onclick="toggleDay(26)"><div class="day-num">26</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Montar lista do próximo ciclo</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(26)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: garantir que o mês 2 começa com combustível. Liste: quem disse "não agora mas em 30 dias", quem tem evento planejado nos próximos 2 meses, indicações recebidas este mês. Cadastre no CRM como "Lead futuro". Meta: 15 contatos prontos para o próximo ciclo.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> lista montada.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(26,this.value)"></textarea></div></div><div class="day-card" id="day-27"><div class="day-head" onclick="toggleDay(27)"><div class="day-num">27</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Prospectar 10 novos leads para o mês 2</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(27)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: começar o próximo ciclo ainda hoje. Pesquise 10 novas empresas que ainda não foram contatadas. Priorize setores que deram mais resultado este mês. Cadastre no CRM.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> 10 novos leads adicionados.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(27,this.value)"></textarea></div></div><div class="day-card" id="day-28"><div class="day-head" onclick="toggleDay(28)"><div class="day-num">28</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Revisão final + relatório do mês</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(28)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: montar o resumo completo do mês. Anote: total de abordagens, respostas recebidas, propostas enviadas, pedidos fechados e valor total gerado. Compare com a meta inicial. Identifique os 3 textos que mais converteram e os 3 produtos mais citados. Envie o relatório completo para Alan.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> relatório enviado e CRM 100% atualizado.</div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(28,this.value)"></textarea></div></div><div class="week-header" style="background:linear-gradient(135deg,#7C3AED,var(--orange))">Semana 5 — Consolidação do mês</div><div class="day-card" id="day-29"><div class="day-head" onclick="toggleDay(29)"><div class="day-num">29</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Organizar carteira para o próximo mês</div><div style="font-size:11px;color:var(--dim)">Kits personalizados · Caneta · Squeeze · Sacola TNT</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(29)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: deixar a carteira de clientes organizada e pronta para o próximo ciclo. Revise todos os contatos do CRM: mova os inativos para "Arquivado", confirme os "Lead futuro" com data prevista de retorno e atualize as observações com o que cada cliente comentou. Prepare uma lista dos 10 clientes com maior potencial para priorizar nas primeiras abordagens do próximo mês.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> CRM 100% atualizado e lista dos 10 prioritários salva.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Kits personalizados</span><span class="chip muted" style="margin:2px">Caneta</span><span class="chip muted" style="margin:2px">Squeeze</span><span class="chip muted" style="margin:2px">Sacola TNT</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(29,this.value)"></textarea></div></div><div class="day-card" id="day-30"><div class="day-head" onclick="toggleDay(30)"><div class="day-num">30</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Relatório final e plano de ação</div><div style="font-size:11px;color:var(--dim)">Kits personalizados · Garrafa térmica · Caneca · Squeeze</div></div><button class="day-status s-pendente" onclick="event.stopPropagation();cycleStatus(30)">Pendente</button></div><div class="day-body"><p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Meta do dia: consolidar os aprendizados do mês e definir o próximo passo. Monte um relatório com: produtos mais solicitados, segmentos com maior retorno, textos que mais geraram resposta, objeções mais comuns e como superou cada uma. Com esses dados, defina os 3 produtos prioritários para o mês 2 e as 3 estratégias de abordagem que mais funcionaram. Compartilhe com Alan.</p><div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> relatório enviado e mês 2 planejado.</div><div style="margin-bottom:10px"><span class="chip muted" style="margin:2px">Kits personalizados</span><span class="chip muted" style="margin:2px">Garrafa térmica</span><span class="chip muted" style="margin:2px">Caneca</span><span class="chip muted" style="margin:2px">Squeeze</span></div><textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs(30,this.value)"></textarea></div></div></div>
   </div>
 </div>
 
@@ -826,14 +826,14 @@ var SEGMENTOS = {
 };
 
 var SCRIPTS = [
-  {tipo:'Primeira abordagem',emoji:'ð',texto:`Olá, tudo bem? Me chamo [SEU NOME] e faço parte da ArznStoreSP Personalizados.
+  {tipo:'Primeira abordagem',emoji:'👋',texto:`Olá, tudo bem? Me chamo [SEU NOME] e faço parte da ArznStoreSP Personalizados.
 
 Trabalhamos com brindes personalizados e materiais corporativos para empresas que querem fortalecer sua marca com produtos úteis, criativos e de qualidade garantida.
 
 Vi o perfil da sua empresa e acredito que temos algumas opções que combinam muito bem com o seu público.
 
-Posso te enviar algumas sugestões de brindes? Sem compromisso. ð`},
-  {tipo:'Follow-up (não respondeu)',emoji:'ð',texto:`Olá, [NOME DA EMPRESA]! Tudo bem?
+Posso te enviar algumas sugestões de brindes? Sem compromisso. 😊`},
+  {tipo:'Follow-up (não respondeu)',emoji:'🔁',texto:`Olá, [NOME DA EMPRESA]! Tudo bem?
 
 Passei aqui para retomar o contato sobre os brindes personalizados que mencionei.
 
@@ -843,13 +843,13 @@ Consigo montar uma proposta rápida para você dar uma olhada. Tem interesse?`},
   {tipo:'Cliente demonstrou interesse',emoji:'â',texto:`Ótimo, [NOME]! Fico feliz que tenha curtido.
 
 Vou montar uma sugestão completa para você com:
-ð¦ Produto: [PRODUTO]
-ð¨ Personalização: [TIPO]
-ð Quantidade: [QTD]
+📦 Produto: [PRODUTO]
+🎨 Personalização: [TIPO]
+📊 Quantidade: [QTD]
 â±ï¸ Prazo: [PRAZO]
 
 Posso te mandar a proposta em PDF hoje ainda. Qual o melhor horário para falarmos?`},
-  {tipo:'Envio de proposta',emoji:'ð',texto:`Olá, [NOME]! Tudo bem?
+  {tipo:'Envio de proposta',emoji:'📋',texto:`Olá, [NOME]! Tudo bem?
 
 Conforme combinamos, segue a proposta de brindes personalizados para a [EMPRESA].
 
@@ -860,14 +860,14 @@ Na ArznStoreSP trabalhamos com:
 â Prazo cumprido
 
 Qualquer dúvida estou à disposição. Podemos conversar esta semana para fechar os detalhes?`},
-  {tipo:'Cliente sumiu',emoji:'ð',texto:`Oi [NOME], tudo bem?
+  {tipo:'Cliente sumiu',emoji:'🔔',texto:`Oi [NOME], tudo bem?
 
 Fico passando para ver se conseguiu dar uma olhada na proposta que enviei.
 
 Se surgiu alguma dúvida ou quiser ajustar alguma coisa — quantidade, produto ou personalização — estou aqui para ajudar.
 
-Nos fala quando tiver um minutinho! ð`},
-  {tipo:'Reativação (cliente antigo)',emoji:'ð',texto:`Olá, [NOME]! Como vai?
+Nos fala quando tiver um minutinho! 😊`},
+  {tipo:'Reativação (cliente antigo)',emoji:'🔄',texto:`Olá, [NOME]! Como vai?
 
 Faz um tempo que não falamos e queria te dar um alô.
 
@@ -880,7 +880,7 @@ Queria saber como ficaram os produtos e se está tudo certo por aí.
 
 Foi um prazer atendê-los! Se precisar de algo — reposição, nova personalização ou outro produto — pode contar com a gente.
 
-E se puder nos avaliar ou indicar para algum parceiro, ficamos muito gratos! ð`},
+E se puder nos avaliar ou indicar para algum parceiro, ficamos muito gratos! 🙏`},
 ];
 
 // ====================== ICON HELPERS ======================
@@ -1020,7 +1020,7 @@ function subscribeRealtime(){
 
 function setSyncStatus(state){
   var el=document.getElementById('syncStatus'); if(!el) return;
-  var map={syncing:'ð Sincronizando…',ok:'ð¢ Sincronizado',err:'ð´ Offline',off:'â« Local'};
+  var map={syncing:'🔄 Sincronizando…',ok:'🟢 Sincronizado',err:'🔴 Offline',off:'â« Local'};
   el.textContent=map[state]||state;
 }
 
@@ -1261,20 +1261,20 @@ function renderCRM() {
 
 
 function editContact(id){
-  var c=contacts.find(function(x){return x.id===id});
-  if(!c) return;
-  document.getElementById('cr-cnpj').value=c.cnpj?c.cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'';
+  var c=id?contacts.find(function(x){return x.id===id}):null;
+  // If id given but not found, open blank (new contact)
+  document.getElementById('cr-cnpj').value=c&&c.cnpj?c.cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'';
   var cst=document.getElementById('cnpj-status');if(cst)cst.innerHTML='';
-  document.getElementById('cr-empresa').value=c.empresa||'';
-  document.getElementById('cr-contato').value=c.contato||'';
-  var elEmail=document.getElementById('cr-email');if(elEmail)elEmail.value=c.email||'';
-  document.getElementById('cr-wa').value=c.wa||'';
-  document.getElementById('cr-seg').value=c.seg||'';
-  document.getElementById('cr-interesse').value=c.interesse||'';
-  document.getElementById('cr-status').value=c.status||'Novo';
-  document.getElementById('cr-prox').value=c.prox||'';
-  document.getElementById('cr-obs').value=c.obs||'';
-  document.getElementById('cr-id').value=id;
+  document.getElementById('cr-empresa').value=c&&c.empresa||'';
+  document.getElementById('cr-contato').value=c&&c.contato||'';
+  var elEmail=document.getElementById('cr-email');if(elEmail)elEmail.value=c&&c.email||'';
+  document.getElementById('cr-wa').value=c&&c.wa||'';
+  document.getElementById('cr-seg').value=c&&c.seg||'';
+  document.getElementById('cr-interesse').value=c&&c.interesse||'';
+  document.getElementById('cr-status').value=c&&c.status||'Novo';
+  document.getElementById('cr-prox').value=c&&c.prox||'';
+  document.getElementById('cr-obs').value=c&&c.obs||'';
+  document.getElementById('cr-id').value=id||'';
   document.getElementById('modalCRM').hidden=false;
 }
 async function saveContact(){
@@ -1448,9 +1448,9 @@ function getPrecoTier(p,qty){
   return p.precoTier1||p.precoFinal||0;
 }
 function tierLabel(qty){
-  if(qty>=1000) return {n:3,cor:'var(--info)',txt:'Nível 3 (â¥1000 un Â· 15%)'};
-  if(qty>=101)  return {n:2,cor:'var(--warn)',txt:'Nível 2 (101–999 un Â· 25%)'};
-  return {n:1,cor:'var(--ok)',txt:'Nível 1 (<100 un Â· 45%)'};
+  if(qty>=1000) return {n:3,cor:'var(--info)',txt:'Nível 3 (â¥1000 un · 15%)'};
+  if(qty>=101)  return {n:2,cor:'var(--warn)',txt:'Nível 2 (101–999 un · 25%)'};
+  return {n:1,cor:'var(--ok)',txt:'Nível 1 (<100 un · 45%)'};
 }
 function savePrecos(){
   var precos={};
@@ -1658,12 +1658,330 @@ function toast(msg,type,dur){
   setTimeout(function(){el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(function(){el.remove()},300)},dur||2500);
 }
 
+// ====================== MISSING FUNCTIONS ======================
+
+// --- Proposta: limpar carrinho ---
+function clearCart(){
+  if(!confirm('Limpar todos os produtos da proposta?')) return;
+  cart=[];
+  localStorage.setItem('cv_cart','[]');
+  renderCart();
+  var badge=document.getElementById('cartBadge');
+  if(badge){ badge.textContent='0'; badge.hidden=true; }
+  toast('Proposta limpa.','ok');
+}
+
+// --- Proposta: gerar mensagem WhatsApp ---
+function schedulePreview(){
+  clearTimeout(window._pvTimer);
+  window._pvTimer=setTimeout(function(){
+    var empresa=document.getElementById('p-empresa').value.trim();
+    var segmento=document.getElementById('p-segmento').value.trim();
+    var acao=document.getElementById('p-acao').value;
+    var obs=document.getElementById('p-obs').value.trim();
+    var modo=document.getElementById('p-modo-preco').value;
+    var nome=localStorage.getItem('cv_vendedora_nome')||'ArznStoreSP';
+    var lines=[];
+    lines.push('Olá'+(empresa?' '+empresa:'')+'! 👋');
+    lines.push('');
+    lines.push('Sou '+nome+' da *ArznStoreSP Personalizados* — especialistas em brindes e presentes corporativos personalizados em São Paulo.');
+    if(acao||segmento){
+      lines.push('');
+      lines.push('Vi que vocês trabalham com '+( segmento||'seu segmento')+(acao?' e que podem se interessar por '+acao.toLowerCase():'')+'.');
+    }
+    if(cart.length>0){
+      lines.push('');
+      lines.push('Segue uma sugestão personalizada para vocês:');
+      lines.push('');
+      cart.forEach(function(p){
+        var pObj=PRODUTOS.find(function(x){return x.id===p.id;});
+        if(!pObj) return;
+        var preco=getPrecoTier(pObj,50);
+        var precoStr='';
+        if(modo==='por-produto' && preco>0){
+          precoStr=' — *R$ '+preco.toFixed(2).replace('.',',')+'/un*';
+        } else if(modo==='apartir' && preco>0 && cart.indexOf(p)===0){
+          precoStr=' (a partir de R$ '+preco.toFixed(2).replace('.',',')+')';
+        }
+        lines.push('✅ *'+pObj.nome+'*'+precoStr);
+        if(pObj.minQty) lines.push('   📦 Qtd mínima: '+pObj.minQty+' unidades');
+      });
+    }
+    if(obs){
+      lines.push('');
+      lines.push('📝 '+obs);
+    }
+    lines.push('');
+    lines.push('Podemos montar uma proposta completa e entregar em até 7 dias úteis. Quer ver mais opções ou tirar dúvidas?');
+    lines.push('');
+    lines.push('_ArznStoreSP Personalizados_');
+    lines.push('@arznstoresp | WhatsApp: (11) 98801-1285');
+    var txt=lines.join('\n');
+    var el=document.getElementById('msgPreview');
+    if(el) el.textContent=txt;
+    var elFinal=document.getElementById('msgFinal');
+    if(elFinal) elFinal.textContent=txt;
+    // sugestão por segmento
+    var seg=segmento.toLowerCase();
+    var sugestEl=document.getElementById('segSugest');
+    if(sugestEl){
+      var segProds=PRODUTOS.filter(function(p){
+        return p.indicado && p.indicado.some(function(s){return s.toLowerCase().indexOf(seg)>=0;});
+      });
+      if(seg && segProds.length>0){
+        sugestEl.innerHTML='<div style="background:var(--orange-lo);border:1px solid var(--orange-mid);border-radius:8px;padding:10px 12px;font-size:12px">'
+          +'<strong>Sugestão para '+segmento+':</strong> '
+          +segProds.slice(0,4).map(function(p){return p.nome;}).join(', ')+'</div>';
+      } else { sugestEl.innerHTML=''; }
+    }
+  },300);
+}
+
+function gerarMensagem(){
+  if(cart.length===0){ toast('Adicione produtos à proposta primeiro.','err'); return; }
+  schedulePreview();
+  // force immediate
+  clearTimeout(window._pvTimer);
+  var empresa=document.getElementById('p-empresa').value.trim();
+  var segmento=document.getElementById('p-segmento').value.trim();
+  var acao=document.getElementById('p-acao').value;
+  var obs=document.getElementById('p-obs').value.trim();
+  var modo=document.getElementById('p-modo-preco').value;
+  var nome=localStorage.getItem('cv_vendedora_nome')||'ArznStoreSP';
+  var lines=[];
+  lines.push('Olá'+(empresa?' *'+empresa+'*':'')+'! 👋');
+  lines.push('');
+  lines.push('Sou '+nome+' da *ArznStoreSP Personalizados* — especialistas em brindes e presentes corporativos personalizados em São Paulo.');
+  if(acao||segmento){
+    lines.push('');
+    lines.push('Trabalhamos com empresas de '+(segmento||'seu segmento')+(acao?' para '+acao.toLowerCase():'')+'.');
+  }
+  if(cart.length>0){
+    lines.push('');
+    lines.push('Selecionamos os seguintes produtos pensando em você:');
+    lines.push('');
+    var minPreco=Infinity;
+    cart.forEach(function(p){
+      var pObj=PRODUTOS.find(function(x){return x.id===p.id;});
+      if(!pObj) return;
+      var preco=getPrecoTier(pObj,50);
+      if(preco>0 && preco<minPreco) minPreco=preco;
+      var precoStr='';
+      if(modo==='por-produto' && preco>0) precoStr=' — *R$ '+preco.toFixed(2).replace('.',',')+'/un*';
+      lines.push('✅ *'+pObj.nome+'*'+precoStr);
+      if(pObj.minQty) lines.push('   📦 Mínimo: '+pObj.minQty+' unidades');
+    });
+    if(modo==='apartir' && minPreco<Infinity){
+      lines.push('');
+      lines.push('💰 A partir de *R$ '+minPreco.toFixed(2).replace('.',',')+'* por unidade');
+    }
+  }
+  if(obs){ lines.push(''); lines.push('📝 '+obs); }
+  lines.push('');
+  lines.push('Podemos montar uma proposta completa com arte e prazo de entrega. Topo conversar?');
+  lines.push('');
+  lines.push('_ArznStoreSP Personalizados_');
+  lines.push('@arznstoresp | WhatsApp: (11) 98801-1285');
+  var txt=lines.join('\n');
+  // Save to history
+  var hist=JSON.parse(localStorage.getItem('cv_hist')||'[]');
+  hist.push({
+    id:Date.now().toString(),
+    cliente:empresa||'Cliente',
+    segmento:segmento,
+    produtos:cart.length,
+    data:new Date().toISOString(),
+    status:'Enviado',
+    wa:'',
+    msg:txt
+  });
+  localStorage.setItem('cv_hist',JSON.stringify(hist));
+  contadorPropostas=hist.length;
+  localStorage.setItem('cv_props',contadorPropostas);
+  // Show modal
+  var elFinal=document.getElementById('msgFinal');
+  if(elFinal) elFinal.textContent=txt;
+  var modal=document.getElementById('modalMsg');
+  if(modal){ modal.hidden=false; ri(modal); }
+  toast('Proposta registrada!','ok');
+  renderHistorico();
+}
+
+// --- Proposta: PDF simples ---
+function gerarPDFDireto(){
+  if(cart.length===0){ toast('Adicione produtos à proposta primeiro.','err'); return; }
+  var empresa=document.getElementById('p-empresa').value.trim()||'Cliente';
+  var segmento=document.getElementById('p-segmento').value.trim();
+  var modo=document.getElementById('p-modo-preco').value;
+  var nome=localStorage.getItem('cv_vendedora_nome')||'ArznStoreSP';
+  var data=new Date().toLocaleDateString('pt-BR');
+  var linhas=cart.map(function(p){
+    var pObj=PRODUTOS.find(function(x){return x.id===p.id;});
+    if(!pObj) return '';
+    var preco=getPrecoTier(pObj,50);
+    var precoCell=(modo!=='nao'&&preco>0)?'R$ '+preco.toFixed(2).replace('.',','):'-';
+    return '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee">'+pObj.nome+'</td>'
+      +'<td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666">'+pObj.cat+'</td>'
+      +'<td style="padding:8px 12px;border-bottom:1px solid #eee">'+(pObj.minQty||1)+' un</td>'
+      +'<td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right">'+precoCell+'</td></tr>';
+  }).join('');
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Proposta '+empresa+'</title>'
+    +'<style>body{font-family:Arial,sans-serif;color:#222;max-width:700px;margin:0 auto;padding:32px}'
+    +'.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #D14203}'
+    +'.brand{font-size:22px;font-weight:900;color:#D14203}table{width:100%;border-collapse:collapse}'
+    +'th{background:#D14203;color:#fff;padding:10px 12px;text-align:left}</style></head><body>'
+    +'<div class="hdr"><div class="brand">ArznStoreSP</div><div style="text-align:right;font-size:13px;color:#666">Data: '+data+'<br>Proposta para: <strong>'+empresa+'</strong></div></div>'
+    +'<h2 style="margin:0 0 6px;font-size:18px">Proposta Comercial</h2>'
+    +(segmento?'<p style="color:#666;margin:0 0 20px">Segmento: '+segmento+'</p>':'<br>')
+    +'<table><thead><tr><th>Produto</th><th>Categoria</th><th>Qtd Mínima</th><th style="text-align:right">Preço/un</th></tr></thead><tbody>'+linhas+'</tbody></table>'
+    +'<p style="margin-top:20px;font-size:12px;color:#888">* Valores sujeitos a confirmação. Prazo médio: 7 dias úteis após aprovação de arte.</p>'
+    +'<p style="margin-top:12px;font-size:12px;color:#888">Vendedora: '+nome+' | @arznstoresp | (11) 98801-1285</p>'
+    +'</body></html>';
+  var blob=new Blob([html],{type:'text/html'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='proposta_'+empresa.replace(/\s+/g,'_')+'.html'; a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  toast('Proposta HTML salva!','ok');
+}
+
+// --- Proposta: PPTX (não disponível sem biblioteca — abre mensagem) ---
+function gerarPPTXDireto(){
+  toast('Use o botão PDF por enquanto. PPTX em breve.','warn');
+}
+function gerarPDF(){ gerarPDFDireto(); }
+function gerarPPTX(){ gerarPPTXDireto(); }
+
+// --- Plano 30 Dias: toggle abrir/fechar dia ---
+function toggleDay(n){
+  var body=document.querySelector('#day-'+n+' .day-body');
+  if(!body) return;
+  var isOpen=body.style.display==='block';
+  // Close all
+  document.querySelectorAll('.day-body').forEach(function(b){b.style.display='none';});
+  if(!isOpen) body.style.display='block';
+}
+
+// --- Plano 30 Dias: ciclar status ---
+function cycleStatus(n){
+  var card=document.getElementById('day-'+n);
+  if(!card) return;
+  var btn=card.querySelector('.day-status');
+  if(!btn) return;
+  var cur=loadDayStatus(n);
+  var order=['pendente','em andamento','concluído'];
+  var idx=order.indexOf(cur);
+  var next=order[(idx+1)%order.length];
+  saveDayStatus(n,next);
+  // Update button
+  var labels={'pendente':'Pendente','em andamento':'Em andamento','concluído':'Concluído'};
+  var classes={'pendente':'s-pendente','em andamento':'s-andamento','concluído':'s-concluido'};
+  btn.textContent=labels[next];
+  btn.className='day-status '+(classes[next]||'s-pendente');
+  // Update progress
+  updatePlanProgress();
+}
+
+function updatePlanProgress(){
+  var total=30, done=0;
+  for(var i=1;i<=30;i++){ if(loadDayStatus(i)==='concluído') done++; }
+  var lbl=document.getElementById('progLabel');
+  var bar=document.getElementById('progBar');
+  if(lbl) lbl.textContent=done+'/'+total;
+  if(bar) bar.style.width=Math.round((done/total)*100)+'%';
+}
+
+function renderPlan(){
+  updatePlanProgress();
+  // Restore obs from localStorage
+  for(var i=1;i<=30;i++){
+    var obs=localStorage.getItem('cv_obs_'+i)||'';
+    var ta=document.querySelector('#day-'+i+' textarea');
+    if(ta && obs) ta.value=obs;
+    var st=loadDayStatus(i);
+    var btn=document.querySelector('#day-'+i+' .day-status');
+    if(btn){
+      var labels={'pendente':'Pendente','em andamento':'Em andamento','concluído':'Concluído'};
+      var classes={'pendente':'s-pendente','em andamento':'s-andamento','concluído':'s-concluido'};
+      btn.textContent=labels[st]||'Pendente';
+      btn.className='day-status '+(classes[st]||'s-pendente');
+    }
+  }
+}
+
+function saveDayObs(n,val){
+  localStorage.setItem('cv_obs_'+n,val);
+}
+
+// --- CRM: abrir modal de novo contato ---
+function openAddContact(){
+  var modal=document.getElementById('modalCRM');
+  if(!modal){ toast('Modal CRM não encontrado.','err'); return; }
+  // Clear fields
+  ['cr-cnpj','cr-empresa','cr-contato','cr-wa','cr-seg','cr-interesse','cr-status','cr-prox','cr-obs'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  var emailEl=document.getElementById('cr-email'); if(emailEl) emailEl.value='';
+  var cst=document.getElementById('cnpj-status'); if(cst) cst.innerHTML='';
+  var editId=document.getElementById('cr-edit-id'); if(editId) editId.value='';
+  var title=modal.querySelector('.modal-title span'); if(title) title.textContent='Novo Contato';
+  modal.hidden=false;
+  ri(modal);
+}
+
+// --- CRM: buscar CNPJ ---
+function maskCNPJ(el){
+  var v=el.value.replace(/\D/g,'').slice(0,14);
+  if(v.length>12) v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5,8)+'/'+v.slice(8,12)+'-'+v.slice(12);
+  else if(v.length>8) v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5,8)+'/'+v.slice(8);
+  else if(v.length>5) v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5);
+  else if(v.length>2) v=v.slice(0,2)+'.'+v.slice(2);
+  el.value=v;
+}
+
+async function buscarCNPJ(){
+  var raw=(document.getElementById('cr-cnpj').value||'').replace(/\D/g,'');
+  if(raw.length!==14){ toast('Digite o CNPJ completo (14 dígitos).','warn'); return; }
+  var cst=document.getElementById('cnpj-status');
+  if(cst) cst.innerHTML='<span style="color:var(--muted)">Buscando…</span>';
+  try{
+    var r=await fetch('https://brasilapi.com.br/api/cnpj/v1/'+raw);
+    if(!r.ok) throw new Error('CNPJ não encontrado');
+    var d=await r.json();
+    var nome=d.razao_social||d.nome_fantasia||'';
+    var seg=d.cnae_fiscal_descricao||'';
+    if(document.getElementById('cr-empresa') && !document.getElementById('cr-empresa').value) document.getElementById('cr-empresa').value=nome;
+    if(document.getElementById('cr-seg') && !document.getElementById('cr-seg').value) document.getElementById('cr-seg').value=seg.slice(0,60);
+    if(cst) cst.innerHTML='<span style="color:var(--ok)">✓ '+esc(nome)+'</span>';
+  }catch(e){
+    if(cst) cst.innerHTML='<span style="color:var(--err)">CNPJ não encontrado</span>';
+  }
+}
+
 // ====================== GLOBALS ======================
 window.gotoPage = gotoPage;
 window.renderDashboard = renderDashboard;
 window.renderCatalog = renderCatalog;
 window.renderCRM = renderCRM;
 window.renderHistorico = renderHistorico;
+window.clearCart = clearCart;
+window.gerarMensagem = gerarMensagem;
+window.gerarPDFDireto = gerarPDFDireto;
+window.gerarPPTXDireto = gerarPPTXDireto;
+window.gerarPDF = gerarPDF;
+window.gerarPPTX = gerarPPTX;
+window.toggleDay = toggleDay;
+window.cycleStatus = cycleStatus;
+window.renderPlan = renderPlan;
+window.saveDayObs = saveDayObs;
+window.openAddContact = openAddContact;
+window.buscarCNPJ = buscarCNPJ;
+window.maskCNPJ = maskCNPJ;
+window.schedulePreview = schedulePreview;
+window.copiarMsg = copiarMsg;
+window.abrirWhatsApp = abrirWhatsApp;
+window.saveContact = saveContact;
+window.syncXbzPrices = syncXbzPrices;
 
 // ====================== INIT ======================
 (function(){

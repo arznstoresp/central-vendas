@@ -1083,7 +1083,7 @@ function gotoPage(id, btn){
 // ====================== DASHBOARD ======================
 function renderDashboard() {
   var nome = localStorage.getItem('cv_vendedora_nome') || '';
-  var props = JSON.parse(localStorage.getItem('cv_props') || '[]');
+  var props = JSON.parse(localStorage.getItem('cv_hist') || '[]'); if(!Array.isArray(props)) props=[];
   var contacts = JSON.parse(localStorage.getItem('cv_contacts') || '[]');
   var today = new Date().toISOString().slice(0,10);
   var propHoje = props.filter(function(p){ return (p.data||'').slice(0,10)===today; }).length;
@@ -1136,8 +1136,8 @@ function renderDashboard() {
       var waLink=c.wa?'<a href="https://wa.me/'+c.wa.replace(/\D/g,'')+'" target="_blank" onclick="event.stopPropagation()" style="color:#25D366;font-size:18px;text-decoration:none">📱</a>':'';
       urgHTML+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">';
       urgHTML+='<span style="width:10px;height:10px;border-radius:50%;background:'+dot+';flex-shrink:0"></span>';
-      urgHTML+='<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">'+escHtml(c.empresa||c.contato||'—')+'</div>';
-      urgHTML+='<div style="font-size:11px;color:var(--muted)">'+escHtml(c.interesse||c.seg||'')+' · último: '+dias+'</div></div>'+waLink+'</div>';
+      urgHTML+='<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">'+esc(c.empresa||c.contato||'—')+'</div>';
+      urgHTML+='<div style="font-size:11px;color:var(--muted)">'+esc(c.interesse||c.seg||'')+' · último: '+dias+'</div></div>'+waLink+'</div>';
     }
     if(urgentes.length>5) urgHTML+='<div style="font-size:11px;color:var(--muted);text-align:center;padding-top:6px">+'+(urgentes.length-5)+' mais no CRM</div>';
   }
@@ -1152,16 +1152,16 @@ function renderDashboard() {
       var pStatus=(p.status||'').toLowerCase();
       var pColor=pStatus==='fechado'?'#1B5E20':pStatus==='aberto'?'#0D47A1':'#37474F';
       pHTML+='<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">';
-      pHTML+='<div><div style="font-size:13px;font-weight:600">'+escHtml(p.nome||p.name||'—')+'</div>';
+      pHTML+='<div><div style="font-size:13px;font-weight:600">'+esc(p.nome||p.name||'—')+'</div>';
       pHTML+='<div style="font-size:11px;color:var(--muted)">'+(p.data?new Date(p.data).toLocaleDateString('pt-BR'):'')+'</div></div>';
-      pHTML+='<span style="font-size:11px;padding:3px 8px;border-radius:20px;background:'+pColor+';color:#fff">'+escHtml(p.status||'—')+'</span></div>';
+      pHTML+='<span style="font-size:11px;padding:3px 8px;border-radius:20px;background:'+pColor+';color:#fff">'+esc(p.status||'—')+'</span></div>';
     }
     lastProps='<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted)">📝 ÚLTIMAS PROPOSTAS</div>'+pHTML+'</div>';
   }
 
   var hora=new Date().getHours();
   var periodo=hora<12?'Bom dia':hora<18?'Boa tarde':'Boa noite';
-  var saudacao=nome?periodo+', '+escHtml(nome)+'! 👋':periodo+'! 👋';
+  var saudacao=nome?periodo+', '+esc(nome)+'! 👋':periodo+'! 👋';
   var datStr=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
 
   document.getElementById('page-dashboard').innerHTML=
@@ -1705,28 +1705,6 @@ function toast(msg,type,dur){
   }
 
 
-  function copiarMsg() {
-    var el=document.getElementById('msgPreview');
-    if(!el) return;
-    var txt=el.innerText||el.textContent||'';
-    if(navigator.clipboard){
-      navigator.clipboard.writeText(txt).then(function(){toast('Mensagem copiada!');}).catch(function(){
-        var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Mensagem copiada!');
-      });
-    } else {
-      var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Mensagem copiada!');
-    }
-  }
-  function abrirWhatsApp() {
-    var el=document.getElementById('msgPreview');
-    if(!el){toast('Gere a mensagem primeiro!');return;}
-    var txt=el.innerText||el.textContent||'';
-    if(!txt.trim()||txt.includes('Preencha')||txt.includes('selecione')){toast('Gere a mensagem primeiro!');return;}
-    var waNum=localStorage.getItem('cv_alan_wa')||'';
-    var encoded=encodeURIComponent(txt);
-    var url=waNum?'https://wa.me/'+waNum.replace(/\D/g,'')+' ?text='+encoded:'https://wa.me/?text='+encoded;
-    window.open(url,'_blank');
-  }
 
 </script>
 

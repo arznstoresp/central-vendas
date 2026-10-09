@@ -1810,6 +1810,13 @@ function gerarPDFDireto(){
   var a=document.createElement('a');
   a.href=url; a.download='proposta_'+empresa.replace(/\s+/g,'_')+'.html'; a.click();
   setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  // Registrar no histórico (cv_hist) para manter contadores consistentes
+  var hist=JSON.parse(localStorage.getItem('cv_hist')||'[]');
+  hist.push({id:Date.now().toString(),cliente:empresa,segmento:segmento,produtos:cart.length,data:new Date().toISOString(),status:'Enviado',wa:'',msg:'[PDF gerado]'});
+  localStorage.setItem('cv_hist',JSON.stringify(hist));
+  contadorPropostas=hist.length;
+  localStorage.setItem('cv_props',contadorPropostas);
+  var dsProps=document.getElementById('ds-props'); if(dsProps) dsProps.textContent=contadorPropostas;
   toast('Proposta HTML salva!','ok');
 }
 

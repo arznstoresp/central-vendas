@@ -1269,7 +1269,7 @@ async function saveContact(){
   localStorage.setItem('cv_contacts',JSON.stringify(contacts));
   closeModal('modalCRM');
   renderCRM();
-  document.getElementById('ds-crm').textContent=contacts.length;
+  var dsCrm=document.getElementById('ds-crm'); if(dsCrm) dsCrm.textContent=contacts.length;
   toast(idx>=0?'Contato atualizado':'Contato salvo ✓','ok');
 }
 async function deleteContact(id){
@@ -1956,9 +1956,9 @@ window.syncXbzPrices = syncXbzPrices;
   loadPrecos();
   contadorPropostas=JSON.parse(localStorage.getItem('cv_hist')||'[]').length;
   localStorage.setItem('cv_props',contadorPropostas);
-  document.getElementById('ds-crm').textContent=contacts.length;
-  document.getElementById('crmBadge').textContent=contacts.length;
-  document.getElementById('ds-props').textContent=contadorPropostas;
+  var dsCrm=document.getElementById('ds-crm'); if(dsCrm) dsCrm.textContent=contacts.length;
+  var crmBadge=document.getElementById('crmBadge'); if(crmBadge) crmBadge.textContent=contacts.length;
+  var dsProps=document.getElementById('ds-props'); if(dsProps) dsProps.textContent=contadorPropostas;
   if(window.lucide) lucide.createIcons();
   renderDashboard();
   renderHistorico();

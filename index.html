@@ -2715,7 +2715,7 @@ async function exportPPTX(){
 }
 
 /* ---------- exportar PDF ---------- */
-var PDF_DPI = 144, PXPT = PDF_DPI/72, PDF_W = Math.round(W*PDF_DPI), PDF_H = Math.round(H*PDF_DPI);
+var PDF_DPI = 96, PXPT = PDF_DPI/72, PDF_W = Math.round(W*PDF_DPI), PDF_H = Math.round(H*PDF_DPI);
 var pdfStage = null;
 function stage(){
   if(pdfStage) return pdfStage;

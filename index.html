@@ -607,6 +607,7 @@ select option{background:var(--surface2)}
     <div style="margin-bottom:16px;display:flex;justify-content:center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="lock" aria-hidden="true" style="width:48px;height:48px;color:var(--orange);stroke-width:1.5" class="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
     <div style="font-weight:800;font-size:18px;margin-bottom:8px">Área Administrativa</div>
     <div style="color:var(--muted);font-size:13px;margin-bottom:20px">Acesso restrito — somente Alan</div>
+    <div id="adminFirstUseHint" style="display:none;background:var(--warn-lo);border:1px solid var(--warn);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--warn);margin-bottom:12px;text-align:left">⚠ Primeiro acesso: defina sua senha agora (mín. 6 caracteres).</div>
     <div class="field"><label>Senha</label><input type="password" id="adminPwd" placeholder="Digite a senha..." onkeydown="if(event.key==='Enter')checkAdmin()"></div>
     <button class="btn btn-primary" style="margin-top:12px;width:100%;justify-content:center" onclick="checkAdmin()">Entrar</button>
   </div>
@@ -626,6 +627,25 @@ select option{background:var(--surface2)}
           <div class="field"><label>Nova senha do painel admin</label><input type="password" id="adminSenha" placeholder="Deixe em branco para manter a atual"></div>
         </div>
         <button class="btn btn-orange" style="margin-top:12px" onclick="saveAdminConfig()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="save" aria-hidden="true" class="lucide lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg>Salvar configurações</button>
+      </div>
+      <div class="card">
+        <div class="card-title">💾 Backup de Dados</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Exporte todos os dados do app (propostas, CRM, configurações) para um arquivo JSON. Importe para restaurar em outro dispositivo ou após limpeza do navegador.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-sm btn-ghost" onclick="exportarBackup()" style="gap:6px">⬇ Exportar backup</button>
+          <label class="btn btn-sm btn-ghost" style="gap:6px;cursor:pointer">⬆ Importar backup<input type="file" accept=".json" style="display:none" onchange="importarBackup(this)"></label>
+        </div>
+      </div>
+      <div id="modalBackup" class="overlay" hidden="" onclick="if(event.target===this)this.hidden=true">
+        <div class="modal" style="max-width:420px">
+          <div class="modal-title">Confirmar Restauração<button class="close-btn" onclick="document.getElementById('modalBackup').hidden=true" style="display:flex;align-items:center;justify-content:center"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+          <div id="modalBackupInfo" style="font-size:13px;margin-bottom:16px;line-height:1.6"></div>
+          <div style="background:var(--warn-lo);border:1px solid var(--warn);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--warn);margin-bottom:16px">⚠ Esta ação substituirá os dados atuais. Exporte um backup antes de continuar.</div>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn btn-sm btn-ghost" onclick="document.getElementById('modalBackup').hidden=true">Cancelar</button>
+            <button class="btn btn-sm btn-orange" id="btnConfirmRestore" onclick="confirmarRestore()">Restaurar mesmo assim</button>
+          </div>
+        </div>
       </div>
       <div class="card">
         <div class="card-title"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="eye" aria-hidden="true" style="width:12px;height:12px" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Produtos — Visibilidade</div>
@@ -1044,7 +1064,7 @@ function gotoPage(id, btn){
   if(id==='trinta') renderPlan();
   if(id==='crm') renderCRM();
   if(id==='textos') renderTextos();
-  if(id==='admin') ri(document.getElementById('page-admin'));
+  if(id==='admin'){ ri(document.getElementById('page-admin')); var hint=document.getElementById('adminFirstUseHint'); if(hint) hint.style.display=localStorage.getItem('cv_admin_pwd')?'none':'block'; }
   if(id==='dashboard') renderDashboard();
 }
 
@@ -1317,13 +1337,24 @@ function saveVendedora(){
 // ====================== ADMIN ======================
 function checkAdmin(){
   var pwd=document.getElementById('adminPwd').value;
-  var saved=localStorage.getItem('cv_admin_pwd')||'arznsp2026';
-  if(pwd===saved){
+  var saved=localStorage.getItem('cv_admin_pwd');
+  if(!saved){
+    // Primeiro acesso: forçar configuração de senha
+    if(pwd.length<6){ toast('Defina uma senha com pelo menos 6 caracteres.','err'); return; }
+    localStorage.setItem('cv_admin_pwd',pwd);
     adminUnlocked=true;
     document.getElementById('adminLock').hidden=true;
     document.getElementById('adminArea').hidden=false;
     loadAdminArea();
-  } else { toast('Senha incorreta','err'); }
+    toast('Senha criada com sucesso!','ok');
+  } else {
+    if(pwd===saved){
+      adminUnlocked=true;
+      document.getElementById('adminLock').hidden=true;
+      document.getElementById('adminArea').hidden=false;
+      loadAdminArea();
+    } else { toast('Senha incorreta','err'); }
+  }
 }
 function lockAdmin(){
   adminUnlocked=false;
@@ -1458,6 +1489,63 @@ function saveAdminConfig(){
   localStorage.setItem('cv_alan_wa',aw);
   if(sp) localStorage.setItem('cv_admin_pwd',sp);
   toast('Configurações salvas ✓','ok');
+}
+
+// ====================== BACKUP ======================
+var _backupPendente=null;
+function exportarBackup(){
+  var keys=Object.keys(localStorage).filter(function(k){ return k.startsWith('cv_'); });
+  var data={};
+  keys.forEach(function(k){ data[k]=localStorage.getItem(k); });
+  data._exportedAt=new Date().toISOString();
+  data._version='1';
+  var json=JSON.stringify(data,null,2);
+  var blob=new Blob([json],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='backup_central_vendas_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); },1000);
+  toast('Backup exportado com sucesso!','ok');
+}
+function importarBackup(input){
+  var file=input.files&&input.files[0];
+  input.value='';
+  if(!file){ return; }
+  if(!file.name.endsWith('.json')){ toast('Arquivo inválido. Use um .json exportado por este app.','err'); return; }
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var data;
+    try{ data=JSON.parse(e.target.result); } catch(ex){ toast('Arquivo JSON inválido.','err'); return; }
+    // Validar: deve ter ao menos uma chave cv_
+    var cvKeys=Object.keys(data).filter(function(k){ return k.startsWith('cv_'); });
+    if(cvKeys.length===0){ toast('Este arquivo não parece ser um backup da Central de Vendas.','err'); return; }
+    _backupPendente=data;
+    // Montar resumo
+    var hist=[];try{hist=JSON.parse(data.cv_hist||'[]');}catch(x){}
+    var contacts=[];try{contacts=JSON.parse(data.cv_contacts||'[]');}catch(x){}
+    var info='<strong>Arquivo:</strong> '+file.name+'<br>'
+      +'<strong>Exportado em:</strong> '+(data._exportedAt?new Date(data._exportedAt).toLocaleString('pt-BR'):'desconhecido')+'<br>'
+      +'<strong>Propostas no backup:</strong> '+hist.length+'<br>'
+      +'<strong>Contatos no backup:</strong> '+contacts.length+'<br>'
+      +'<strong>Chaves encontradas:</strong> '+cvKeys.length;
+    document.getElementById('modalBackupInfo').innerHTML=info;
+    document.getElementById('modalBackup').hidden=false;
+  };
+  reader.readAsText(file);
+}
+function confirmarRestore(){
+  if(!_backupPendente){ document.getElementById('modalBackup').hidden=true; return; }
+  var data=_backupPendente;
+  _backupPendente=null;
+  // Remover chaves cv_ atuais
+  Object.keys(localStorage).filter(function(k){ return k.startsWith('cv_'); }).forEach(function(k){ localStorage.removeItem(k); });
+  // Restaurar do backup
+  Object.keys(data).filter(function(k){ return k.startsWith('cv_'); }).forEach(function(k){ localStorage.setItem(k,data[k]); });
+  document.getElementById('modalBackup').hidden=true;
+  toast('Backup restaurado! Recarregando…','ok');
+  setTimeout(function(){ location.reload(); },1500);
 }
 
 // ====================== CATÁLOGO ======================
@@ -1775,7 +1863,8 @@ function gerarMensagem(){
   renderHistorico();
 }
 
-// --- Proposta: PDF simples ---
+// --- Proposta: PDF real via html2pdf.js ---
+var _html2pdfLoading=false;
 function gerarPDFDireto(){
   if(cart.length===0){ toast('Adicione produtos à proposta primeiro.','err'); return; }
   var empresa=document.getElementById('p-empresa').value.trim()||'Cliente';
@@ -1793,31 +1882,55 @@ function gerarPDFDireto(){
       +'<td style="padding:8px 12px;border-bottom:1px solid #eee">'+(pObj.minQty||1)+' un</td>'
       +'<td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right">'+precoCell+'</td></tr>';
   }).join('');
-  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Proposta '+empresa+'</title>'
-    +'<style>body{font-family:Arial,sans-serif;color:#222;max-width:700px;margin:0 auto;padding:32px}'
-    +'.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #D14203}'
-    +'.brand{font-size:22px;font-weight:900;color:#D14203}table{width:100%;border-collapse:collapse}'
-    +'th{background:#D14203;color:#fff;padding:10px 12px;text-align:left}</style></head><body>'
-    +'<div class="hdr"><div class="brand">ArznStoreSP</div><div style="text-align:right;font-size:13px;color:#666">Data: '+data+'<br>Proposta para: <strong>'+empresa+'</strong></div></div>'
+  var htmlContent='<div style="font-family:Arial,sans-serif;color:#222;max-width:700px;margin:0 auto;padding:32px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #D14203">'
+    +'<div style="font-size:22px;font-weight:900;color:#D14203">ArznStoreSP</div>'
+    +'<div style="text-align:right;font-size:13px;color:#666">Data: '+data+'<br>Proposta para: <strong>'+empresa+'</strong></div></div>'
     +'<h2 style="margin:0 0 6px;font-size:18px">Proposta Comercial</h2>'
     +(segmento?'<p style="color:#666;margin:0 0 20px">Segmento: '+segmento+'</p>':'<br>')
-    +'<table><thead><tr><th>Produto</th><th>Categoria</th><th>Qtd Mínima</th><th style="text-align:right">Preço/un</th></tr></thead><tbody>'+linhas+'</tbody></table>'
+    +'<table style="width:100%;border-collapse:collapse"><thead><tr>'
+    +'<th style="background:#D14203;color:#fff;padding:10px 12px;text-align:left">Produto</th>'
+    +'<th style="background:#D14203;color:#fff;padding:10px 12px;text-align:left">Categoria</th>'
+    +'<th style="background:#D14203;color:#fff;padding:10px 12px;text-align:left">Qtd Mínima</th>'
+    +'<th style="background:#D14203;color:#fff;padding:10px 12px;text-align:right">Preço/un</th>'
+    +'</tr></thead><tbody>'+linhas+'</tbody></table>'
     +'<p style="margin-top:20px;font-size:12px;color:#888">* Valores sujeitos a confirmação. Prazo médio: 7 dias úteis após aprovação de arte.</p>'
     +'<p style="margin-top:12px;font-size:12px;color:#888">Vendedora: '+nome+' | @arznstoresp | (11) 98801-1285</p>'
-    +'</body></html>';
-  var blob=new Blob([html],{type:'text/html'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url; a.download='proposta_'+empresa.replace(/\s+/g,'_')+'.html'; a.click();
-  setTimeout(function(){URL.revokeObjectURL(url);},1000);
-  // Registrar no histórico (cv_hist) para manter contadores consistentes
+    +'</div>';
+  // Registrar no histórico antes de gerar
   var hist=JSON.parse(localStorage.getItem('cv_hist')||'[]');
   hist.push({id:Date.now().toString(),cliente:empresa,segmento:segmento,produtos:cart.length,data:new Date().toISOString(),status:'Enviado',wa:'',msg:'[PDF gerado]'});
   localStorage.setItem('cv_hist',JSON.stringify(hist));
   contadorPropostas=hist.length;
   localStorage.setItem('cv_props',contadorPropostas);
   var dsProps=document.getElementById('ds-props'); if(dsProps) dsProps.textContent=contadorPropostas;
-  toast('Proposta HTML salva!','ok');
+  // Gerar PDF real
+  var nomeArq='proposta_'+empresa.replace(/\s+/g,'_')+'.pdf';
+  function doGerar(){
+    var elem=document.createElement('div');
+    elem.innerHTML=htmlContent;
+    document.body.appendChild(elem);
+    html2pdf().set({margin:10,filename:nomeArq,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(elem).save().then(function(){
+      document.body.removeChild(elem);
+      toast('PDF gerado com sucesso!','ok');
+    }).catch(function(){
+      document.body.removeChild(elem);
+      toast('Erro ao gerar PDF','err');
+    });
+  }
+  if(window.html2pdf){
+    doGerar();
+  } else if(!_html2pdfLoading) {
+    _html2pdfLoading=true;
+    toast('Carregando gerador de PDF…','ok');
+    var s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    s.onload=function(){ _html2pdfLoading=false; doGerar(); };
+    s.onerror=function(){ _html2pdfLoading=false; toast('Não foi possível carregar o gerador de PDF. Verifique sua conexão.','err'); };
+    document.head.appendChild(s);
+  } else {
+    toast('Aguarde, carregando gerador de PDF…','ok');
+  }
 }
 
 // --- Proposta: PPTX (não disponível sem biblioteca — abre mensagem) ---
@@ -1957,6 +2070,9 @@ window.copiarMsg = copiarMsg;
 window.abrirWhatsApp = abrirWhatsApp;
 window.saveContact = saveContact;
 window.syncXbzPrices = syncXbzPrices;
+window.exportarBackup = exportarBackup;
+window.importarBackup = importarBackup;
+window.confirmarRestore = confirmarRestore;
 
 // ====================== INIT ======================
 (function(){

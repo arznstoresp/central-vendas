@@ -1085,581 +1085,147 @@ function gotoPage(id, btn){
 
 // ====================== DASHBOARD ======================
 function renderDashboard(){
-  document.getElementById('ds-skus').textContent = PRODUTOS.filter(function(p){return p.visivelVendedor}).length;
-  document.getElementById('ds-crm').textContent = contacts.length;
-  var done = PLANO_30.filter(function(d){return d.type==='day'&&d.status==='concluido'}).length;
-  document.getElementById('ds-dias').textContent = done;
-  document.getElementById('ds-props').textContent = contadorPropostas;
-  document.getElementById('crmBadge').textContent = contacts.length;
-  // segs
-  var segs=['Academia','Escritório','Loja','Evento','Empresa de serviços','Imobiliária','Restaurante','Escola'];
-  document.getElementById('dashSegs').innerHTML=segs.map(function(s){
-    return '<div class="seg-card" onclick="abrirSegProposta(\''+s+'\')">'
-      +'<div class="seg-icon" style="font-size:0">'+ic(SEG_IC[s]||'building-2',32,'var(--orange)')+'</div>'
-      +'<div class="seg-name">'+s+'</div></div>';
-  }).join('');
-  ri(document.getElementById('dashSegs'));
-  // prod cards
-  var rapidos=PRODUTOS.filter(function(p){return p.status==='venda-rapida'&&p.visivelVendedor}).slice(0,4);
-  var premium=PRODUTOS.filter(function(p){return p.nivel==='premium'&&p.visivelVendedor}).slice(0,2);
-  var baixo=PRODUTOS.filter(function(p){return p.nivel==='baixo'&&p.visivelVendedor}).slice(0,2);
-  document.getElementById('dashVendaRapida').innerHTML=rapidos.map(miniCard).join('');
-  document.getElementById('dashPremium').innerHTML=premium.map(miniCard).join('');
-  document.getElementById('dashBaixo').innerHTML=baixo.map(miniCard).join('');
-  ri(document.getElementById('page-dashboard'));
-}
-function miniCard(p){
-  var imgHtml=p.imagem
-    ?'<img src="'+p.imagem+'" style="width:100%;height:100%;object-fit:cover;border-radius:8px 8px 0 0" loading="lazy" alt="'+p.nome+'">'
-    :ic(catIc(p.cat),40,'rgba(209,66,3,.5)');
-  return '<div class="prod-card" onclick="openProd(\x27'+p.id+'\x27)">'
-    +'<div class="prod-img" style="aspect-ratio:1/1;overflow:hidden">'+imgHtml
-    +'<div class="selos">'
-    +(p.status==='venda-rapida'?'<span class="chip green" style="font-size:9px;padding:2px 6px">R\xe1pido</span>':'')
-    +(p.nivel==='premium'?'<span class="chip purple" style="font-size:9px;padding:2px 6px">Premium</span>':'')
-    +'</div></div>'
-    +'<div class="prod-info"><div class="prod-code">'+(p.codigoXbz||p.sku)+'</div>'
-    +'<div class="prod-name">'+p.nome+'</div>'
-    +'<div class="prod-bottom"><span style="font-size:11px;color:var(--dim)">Min: '+p.minQtd+'</span>'
-    +'<button class="check-add" onclick="event.stopPropagation();addToCart(\x27'+p.id+'\x27)" title="Adicionar \xe0 proposta">+</button></div>'
-    +'</div></div>';
-}
-
-function abrirSegProposta(seg){
-  filterActive=seg;
-  gotoPage('catalogo',document.querySelector('[onclick*=catalogo]'));
-  setTimeout(renderCatalog,50);
-}
-
-// ====================== CATÁLOGO ======================
-var CATS=['Todos','Escritório','Corporativo','Academia','Eventos','Tecnologia','Gourmet','Ecológico','Premium','Vestuário','Kits personalizados','Brindes rápidos','Datas comemorativas'];
-
-function renderCatalog(){
-  var q=(document.getElementById('searchInput').value||'').toLowerCase();
-  // filter chips
-  var fc=document.getElementById('filterChips');
-  fc.innerHTML=CATS.map(function(c){
-    return '<button class="filter-chip'+(filterActive===c||(!filterActive&&c==='Todos')?' active':'')+'" onclick="setFilter(\''+c+'\')">'+c+'</button>';
-  }).join('');
-  // products
-  var list=PRODUTOS.filter(function(p){
-    if(!p.visivelVendedor) return false;
-    var matchCat=!filterActive||filterActive==='Todos'||p.cat===filterActive||p.indicado.indexOf(filterActive)>=0;
-    var matchQ=!q||p.nome.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)||p.desc.toLowerCase().includes(q)||p.indicado.join(' ').toLowerCase().includes(q);
-    return matchCat&&matchQ;
+  // Métricas do Supabase/localStorage
+  const propostas = JSON.parse(localStorage.getItem('propostas')||'[]');
+  const crm = JSON.parse(localStorage.getItem('crm_contacts')||'[]');
+  const hoje = new Date().toDateString();
+  const propHoje = propostas.filter(p=>new Date(p.data||p.created_at||0).toDateString()===hoje);
+  const semResposta = propostas.filter(p=>{
+    if(!p.data && !p.created_at) return false;
+    const dias = (Date.now()-new Date(p.data||p.created_at).getTime())/(1000*60*60*24);
+    return dias>=2 && p.status!=='fechado' && p.status!=='recusado';
   });
-  if(!list.length){
-    document.getElementById('catalogGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0">Nenhum produto encontrado. <button class="btn btn-sm" onclick="clearFilters()">Limpar filtros</button></div>';
-    return;
-  }
-  var cg=document.getElementById('catalogGrid');
-  cg.innerHTML=list.map(function(p){
-    var inCart=cart.findIndex(function(c){return c.id===p.id})>=0;
-    var cartItem=cart.find(function(c){return c.id===p.id});
-    var qty=cartItem?cartItem.qty:p.minQtd||1;
-    var preco=getPrecoTier(p,qty);
-    var precoHtml=preco>0?'<span style="font-size:12px;font-weight:700;color:var(--orange)">'+fmtPreco(preco)+'</span>':'<span style="font-size:12px;color:var(--dim)">Consultar</span>';
-    var codeLabel=p.codigoXbz||p.sku;
-    return '<div class="prod-card'+(inCart?' selected':'')+'" id="card-'+p.id+'" onclick="openProd(\''+p.id+'\')">'
-      +'<div class="prod-img">'+(p.imagem?'<img src="'+p.imagem+'" loading="lazy" alt="'+p.nome+'">':'<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%">'+ic(catIc(p.cat),44,'rgba(209,66,3,.4)')+'</div>')
-      +'<div class="selos">'
-      +(p.status==='venda-rapida'?'<span class="chip green" style="font-size:9px;padding:2px 6px">Rápido</span>':'')
-      +(p.nivel==='premium'?'<span class="chip purple" style="font-size:9px;padding:2px 6px">Premium</span>':'')
-      +(inCart?'<span style="font-size:9px;padding:2px 6px;background:var(--orange);color:#fff;border-radius:4px;font-weight:700">✓</span>':'')
-      +'</div>'
-      +'</div>'
-      +'<div class="prod-info">'
-      +'<div class="prod-code">'+codeLabel+'</div>'
-      +'<div class="prod-name">'+p.nome+'</div>'
-      +'<div class="prod-bottom">'+precoHtml
-      +'<button class="check-add" onclick="event.stopPropagation();addToCart(\''+p.id+'\')" title="Adicionar à proposta">'+(inCart?ic('check',12,'#fff'):ic('plus',12))+'</button>'
-      +'</div></div></div>';
-  }).join('');
-  ri(cg);
-}
-function setFilter(c){ filterActive=(c==='Todos'?'':c); renderCatalog(); }
-function clearFilters(){ filterActive=''; document.getElementById('searchInput').value=''; renderCatalog(); }
+  const fechadasMes = propostas.filter(p=>{
+    const d=new Date(p.data||p.created_at||0);
+    const n=new Date();
+    return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()&&p.status==='fechado';
+  });
+  const totalSkus = (typeof PRODUTOS!=='undefined'?PRODUTOS:window.PRODUTOS||[]).filter(p=>p.ativo!==false).length;
 
-// ====================== PRODUCT MODAL ======================
-function openProd(id){
-  currentProd=id;
-  var p=PRODUTOS.find(function(x){return x.id===id});
-  if(!p) return;
-  document.getElementById('mpTitle').textContent=p.nome;
-  // imagem real ou ícone
-  var imgEl=document.getElementById('mpImg');
-  if(p.imagem){
-    imgEl.innerHTML='<img src="'+p.imagem+'" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px" alt="'+p.nome+'">';
-  } else {
-    imgEl.innerHTML='<div style="display:flex;justify-content:center;padding:20px 0">'+ic(catIc(p.cat),80,'rgba(209,66,3,.5)')+'</div>';
-    ri(imgEl);
-  }
-  // cat + SKU + codigoXbz
-  var chips='<span class="chip">'+p.cat+'</span> <span class="chip muted">SKU: '+p.sku+'</span>';
-  if(p.codigoXbz) chips+=' <a href="'+p.linkFornecedor+'" target="_blank" class="chip" style="background:var(--orange-lo);color:var(--orange);text-decoration:none;cursor:pointer">XBZ: '+p.codigoXbz+'</a>';
-  document.getElementById('mpCat').innerHTML=chips;
-  document.getElementById('mpDesc').textContent=p.desc;
-  // indicado + personalizações
-  var chipHtml=p.personalizacoes.map(function(x){return '<span class="chip blue">'+x+'</span>'}).join('');
-  chipHtml+=p.indicado.map(function(x){return '<span class="chip muted">'+x+'</span>'}).join('');
-  document.getElementById('mpChips').innerHTML=chipHtml;
-  document.getElementById('mpMin').textContent=p.minQtd;
-  document.getElementById('mpPrazo').textContent=p.prazo;
-  document.getElementById('mpArgs').textContent=p.args;
-  document.getElementById('modalProd').hidden=false;
-}
-function closeModal(id){ document.getElementById(id).hidden=true; }
+  document.getElementById('main-content').innerHTML = `
+    <div style="padding:0 0 32px">
+      <!-- Cabeçalho do dia -->
+      <div style="margin-bottom:20px">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.35);margin:0 0 4px">${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</p>
+        <h1 style="font-size:22px;font-weight:800;color:#fff;margin:0">Bom dia, Alan! 👋</h1>
+        <p style="font-size:13px;color:rgba(255,255,255,.45);margin:4px 0 0">Aqui está o resumo do negócio hoje.</p>
+      </div>
 
-// ====================== CART ======================
-function addToCart(id){
-  var pid=typeof id==='string'?id:id;
-  var p=PRODUTOS.find(function(x){return x.id===pid});
-  if(!p) return;
-  var existing=cart.find(function(c){return c.id===pid});
-  if(existing){ existing.qty=(existing.qty||1)+1; }
-  else { cart.push({id:pid,qty:1,pers:p.personalizacoes[0]||''}); }
-  saveCart();
-  toast('✓ '+p.nome+' adicionado à proposta','ok');
-  var el=document.getElementById('card-'+pid);
-  if(el){el.classList.add('selected');var btn=el.querySelector('.check-add');if(btn)btn.textContent='✓';}
-  schedulePreview();
-}
-function removeFromCart(id){
-  cart=cart.filter(function(c){return c.id!==id});
-  saveCart();
-  renderCart();
-  schedulePreview();
-  var el=document.getElementById('card-'+id);
-  if(el){el.classList.remove('selected');var btn=el.querySelector('.check-add');if(btn)btn.textContent='+';}
-}
-function clearCart(){
-  cart=[];
-  saveCart();
-  renderCart();
-  schedulePreview();
-  document.querySelectorAll('.prod-card.selected').forEach(function(el){
-    el.classList.remove('selected');
-    var btn=el.querySelector('.check-add');if(btn)btn.textContent='+';
-  });
-}
-function saveCart(){
-  localStorage.setItem('cv_cart',JSON.stringify(cart));
-  var b=document.getElementById('cartBadge');
-  b.hidden=cart.length===0;
-  b.textContent=cart.length;
-}
-function renderCart(){
-  var cc=document.getElementById('cartCount');
-  if(cc) cc.textContent=cart.length;
-  var ci=document.getElementById('cartItems');
-  if(!ci) return;
-  if(!cart.length){
-    ci.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px 0">Nenhum produto. Vá ao catálogo e adicione.</div>';
-    return;
-  }
-  ci.innerHTML=cart.map(function(c){
-    var p=PRODUTOS.find(function(x){return x.id===c.id});
-    if(!p) return '';
-    var opts=p.personalizacoes.map(function(x){return '<option value="'+x+'"'+(c.pers===x?' selected':'')+'>'+x+'</option>'}).join('');
-    var qty=c.qty||1;
-    var tier=tierLabel(qty);
-    var preco=getPrecoTier(p,qty);
-    var precoInfo=preco>0
-      ?'<div style="font-size:11px;color:'+tier.cor+';margin-top:3px">'+tier.txt+' → '+fmtPreco(preco)+'/un'+(preco>0?' · Total: '+fmtPreco(preco*qty):'')+'</div>'
-      :'';
-    return '<div class="cart-item" style="flex-wrap:wrap">'
-      +'<span style="display:flex;align-items:center;color:var(--orange)">'+ic(catIc(p.cat),24,'var(--orange)')+'</span>'
-      +'<div class="ci-name" style="flex:1;min-width:80px">'+p.nome+precoInfo+'</div>'
-      +'<input type="number" class="cart-qty" value="'+qty+'" min="1" onchange="updateCart(\''+c.id+'\',\'qty\',this.value)" style="width:70px">'
-      +'<select style="width:130px" onchange="updateCart(\''+c.id+'\',\'pers\',this.value)">'+opts+'</select>'
-      +'<button class="cart-remove" onclick="removeFromCart(\''+c.id+'\')" style="display:flex;align-items:center">'+ic('x',16,'var(--muted)')+'</button>'
-      +'</div>';
-  }).join('');
-  ri(ci);
-}
-function updateCart(id,field,val){
-  var item=cart.find(function(c){return c.id===id});
-  if(!item) return;
-  if(field==='qty') item.qty=Math.max(1,parseInt(val)||1);
-  if(field==='pers') item.pers=val;
-  saveCart();
-  renderCart();
-  schedulePreview();
-}
+      <!-- KPIs de ação -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 16px">
+          <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin:0 0 6px">Propostas hoje</p>
+          <p style="font-size:28px;font-weight:800;color:${propHoje.length>0?'#D14203':'rgba(255,255,255,.5)'};margin:0 0 2px">${propHoje.length}</p>
+          <p style="font-size:11px;color:rgba(255,255,255,.3);margin:0">enviadas</p>
+        </div>
+        <div style="background:${semResposta.length>0?'rgba(209,66,3,.12)':'rgba(255,255,255,.04)'};border:1px solid ${semResposta.length>0?'rgba(209,66,3,.3)':'rgba(255,255,255,.07)'};border-radius:10px;padding:14px 16px">
+          <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin:0 0 6px">Aguardando resposta</p>
+          <p style="font-size:28px;font-weight:800;color:${semResposta.length>0?'#ff6b35':'rgba(255,255,255,.5)'};margin:0 0 2px">${semResposta.length}</p>
+          <p style="font-size:11px;color:rgba(255,255,255,.3);margin:0">+2 dias sem retorno</p>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 16px">
+          <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin:0 0 6px">Fechamentos no mês</p>
+          <p style="font-size:28px;font-weight:800;color:${fechadasMes.length>0?'#22c55e':'rgba(255,255,255,.5)'};margin:0 0 2px">${fechadasMes.length}</p>
+          <p style="font-size:11px;color:rgba(255,255,255,.3);margin:0">pedidos confirmados</p>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 16px">
+          <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin:0 0 6px">Contatos no CRM</p>
+          <p style="font-size:28px;font-weight:800;color:rgba(255,255,255,.8);margin:0 0 2px">${crm.length}</p>
+          <p style="font-size:11px;color:rgba(255,255,255,.3);margin:0">empresas cadastradas</p>
+        </div>
+      </div>
 
-// ====================== PROPOSTA / MENSAGEM ======================
-function schedulePreview(){ clearTimeout(msgTimer); msgTimer=setTimeout(updatePreview,300); }
-function updatePreview(){
-  var empresa=document.getElementById('p-empresa')?document.getElementById('p-empresa').value:'';
-  var seg=document.getElementById('p-segmento')?document.getElementById('p-segmento').value:'';
-  var acao=document.getElementById('p-acao')?document.getElementById('p-acao').value:'';
-  var prev=document.getElementById('msgPreview');
-  if(!prev) return;
-  if(!cart.length||!empresa){ prev.textContent='Preencha o nome do cliente e selecione produtos para ver a mensagem...'; prev.style.color='var(--muted)'; return; }
-  prev.textContent=buildMsg(empresa,seg,acao);
-  prev.style.color='var(--text)';
-  // sugestões
-  var ss=document.getElementById('segSugest');
-  if(ss&&seg&&SEGMENTOS[seg]){
-    ss.innerHTML='<div style="margin-bottom:8px;font-size:12px;color:var(--muted)">Produtos indicados para '+seg+':</div>'
-      +SEGMENTOS[seg].map(function(s){return '<span class="chip" style="margin:3px">'+s+'</span>'}).join('');
-  }
-}
-function fmtPreco(v){ return v>0?'R$ '+parseFloat(v).toFixed(2).replace('.',','):'—'; }
-function buildMsg(empresa,seg,acao){
-  var nome=localStorage.getItem('cv_vendedora_nome')||'[SEU NOME]';
-  var modoEl=document.getElementById('p-modo-preco');
-  var modo=modoEl?modoEl.value:'nao';
-  var linhas=[];
-  linhas.push('Olá! Tudo bem? Me chamo '+nome+', da *ArznStoreSP Personalizados*.\n');
-  if(acao){
-    linhas.push('Preparei algumas opções de brindes com *personalização exclusiva* para a sua '+acao.toLowerCase()+' — cada item com *sua marca em destaque*:\n');
-  } else {
-    linhas.push('Separei alguns produtos com *personalização exclusiva* que combinam muito com o perfil da *'+empresa+'*:\n');
-  }
-  var precos=[];
-  cart.forEach(function(c){
-    var p=PRODUTOS.find(function(x){return x.id===c.id});
-    if(!p) return;
-    linhas.push('▸ *'+p.nome+'*');
-    linhas.push('   🔢 Quantidade: '+c.qty+' unidades');
-    linhas.push('   🎨 Personalização: '+(c.pers||p.personalizacoes[0]));
-    var precoUnit=getPrecoTier(p,c.qty);
-    if(modo==='por-produto'&&precoUnit>0){
-      linhas.push('   💰 Valor unitário: *'+fmtPreco(precoUnit)+'*');
-      linhas.push('   📦 Total: *'+fmtPreco(precoUnit*c.qty)+'*');
-    }
-    linhas.push('   ⏱️ Prazo: '+p.prazo);
-    if(p.indicado&&p.indicado.length){
-      linhas.push('   💡 Indicado para: '+p.indicado.slice(0,3).join(', '));
-    }
-    if(p.precoFinal>0) precos.push(p.precoFinal);
-    linhas.push('');
-  });
-  if(modo==='apartir'&&cart.length){
-    var menorCalc=[];
-    cart.forEach(function(c){var pp=PRODUTOS.find(function(x){return x.id===c.id});if(pp){var v=getPrecoTier(pp,c.qty);if(v>0)menorCalc.push(v);}});
-    if(menorCalc.length){
-      var menor=Math.min.apply(null,menorCalc);
-      linhas.push('💰 *Produtos a partir de '+fmtPreco(menor)+'/unidade* (personalização inclusa)\n');
-    }
-  }
-  linhas.push('Na *ArznStoreSP* você garante:');
-  linhas.push('✅ Personalização exclusiva com *impacto visual*');
-  linhas.push('✅ *Sua marca em destaque* em cada peça');
-  linhas.push('✅ Qualidade garantida e prazo cumprido\n');
-  linhas.push('Posso montar a proposta completa e enviar ainda hoje. Topa? 😊');
-  return linhas.join('\n');
-}
-function gerarMensagem(){
-  var empresa=document.getElementById('p-empresa').value.trim();
-  var seg=document.getElementById('p-segmento').value;
-  var acao=document.getElementById('p-acao').value;
-  var obs=document.getElementById('p-obs')?document.getElementById('p-obs').value.trim():'';
-  if(!cart.length){ toast('Adicione pelo menos um produto à proposta','err'); return; }
-  if(!empresa){ toast('Informe o nome do cliente','err'); return; }
-  var msg=buildMsg(empresa,seg,acao);
-  // salvar no histórico automaticamente
-  var hist=JSON.parse(localStorage.getItem('cv_hist')||'[]');
-  var prods=cart.map(function(c){
-    var p=PRODUTOS.find(function(x){return x.id===c.id});
-    return {nome:p?p.nome:c.id,qty:c.qty,pers:c.pers};
-  });
-  var entry={id:'prop'+Date.now(),data:new Date().toLocaleString('pt-BR'),empresa:empresa,segmento:seg,acao:acao,obs:obs,produtos:prods,mensagem:msg,status:'Proposta enviada'};
-  hist.unshift(entry);
-  if(hist.length>100) hist=hist.slice(0,100);
-  localStorage.setItem('cv_hist',JSON.stringify(hist));
-  contadorPropostas=hist.length;
-  localStorage.setItem('cv_props',contadorPropostas);
-  if(document.getElementById('ds-props')) document.getElementById('ds-props').textContent=contadorPropostas;
-  renderHistorico();
-  document.getElementById('msgFinal').textContent=msg;
-  document.getElementById('modalMsg').hidden=false;
-}
-function gerarPDFDireto(){gerarMensagem();setTimeout(function(){gerarPDF();var m=document.getElementById("modalMsg");if(m)m.hidden=true;},200);}function gerarPPTXDireto(){gerarMensagem();setTimeout(function(){gerarPPTX();var m=document.getElementById("modalMsg");if(m)m.hidden=true;},200);}function gerarPDF(){
-  var empresa=document.getElementById('p-empresa').value.trim()||'Cliente';
-  var seg=(document.getElementById('p-segmento')||{}).value||'';
-  var msg=(document.getElementById('msgFinal')||{}).textContent||'';
-  var nome=localStorage.getItem('cv_vendedora_nome')||'ArznStoreSP';
-  var data=new Date().toLocaleDateString('pt-BR');
-  var rows='';
-  cart.forEach(function(c){
-    var p=PRODUTOS.find(function(x){return x.id===c.id;});
-    if(!p) return;
-    var modoEl=document.getElementById('p-modo-preco');
-    var modo=modoEl?modoEl.value:'nao';
-    var precoStr='';
-    if(modo!=='nao'&&p.preco){var v=parseFloat(p.preco)*c.qty;precoStr='R$ '+v.toFixed(2).replace('.',',');}
-    rows+='<tr><td>'+esc(p.nome)+'</td><td align="center">'+c.qty+'</td><td>'+esc(c.pers||'—')+'</td><td>'+precoStr+'</td></tr>';
-  });
-  var w=window.open('','_blank','width=820,height=700');
-  if(!w){toast('Permita pop-ups para gerar PDF','err');return;}
-  w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Proposta — '+esc(empresa)+'</title><style>'+
-    'body{font-family:Arial,sans-serif;padding:36px 44px;color:#111;max-width:700px;margin:0 auto;font-size:13px}'+
-    'h1{font-size:20px;margin:0 0 2px}h2{font-size:13px;font-weight:normal;color:#666;margin:0 0 20px}'+
-    '.brand{font-size:12px;color:#D14203;font-weight:bold;letter-spacing:.5px;margin-bottom:6px}'+
-    'table{width:100%;border-collapse:collapse;margin:16px 0}'+
-    'th{background:#f0f0f0;padding:7px 10px;text-align:left;font-size:12px;border-bottom:2px solid #ddd}'+
-    'td{padding:7px 10px;border-bottom:1px solid #eee}'+
-    '.msg{background:#f8f8f8;border-left:3px solid #D14203;padding:14px;white-space:pre-wrap;line-height:1.65;margin-top:18px}'+
-    '.footer{margin-top:28px;font-size:10px;color:#aaa;text-align:center;border-top:1px solid #eee;padding-top:10px}'+
-    '.print-btn{margin-top:20px;background:#D14203;color:#fff;border:none;padding:9px 22px;border-radius:5px;cursor:pointer;font-size:13px}'+
-    '@media print{.print-btn{display:none}body{padding:16px}}'+
-    '</style></head><body>'+
-    '<div class="brand">⚡ ARZNSTORESP PERSONALIZADOS</div>'+
-    '<h1>Proposta Comercial</h1>'+
-    '<h2>'+esc(empresa)+(seg?' — '+esc(seg):'')+' &nbsp;·&nbsp; '+data+'</h2>'+
-    '<table><thead><tr><th>Produto</th><th>Qtd</th><th>Personalização</th><th>Valor</th></tr></thead><tbody>'+rows+'</tbody></table>'+
-    '<div class="msg">'+esc(msg)+'</div>'+
-    '<div class="footer">'+esc(nome)+' · ArznStoreSP Personalizados · WhatsApp (11) 98801-1285</div>'+
-    '<button class="print-btn" onclick="window.print()">Imprimir / Salvar como PDF</button>'+
-    '</body></html>');
-  w.document.close();
-}
-async function gerarPPTX(){
-  var empresa=document.getElementById('p-empresa').value.trim()||'Cliente';
-  var seg=(document.getElementById('p-segmento')||{}).value||'';
-  var msg=(document.getElementById('msgFinal')||{}).textContent||'';
-  
-  toast('Gerando PPTX...','ok');
-  if(!window.PptxGenJS){
-    try{
-      await new Promise(function(res,rej){
-        var s=document.createElement('script');
-        s.src='https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js';
-        s.onload=res;s.onerror=rej;
-        document.head.appendChild(s);
-      });
-    }catch(e){toast('Erro ao carregar biblioteca PPTX','err');return;}
-  }
-  var nome=localStorage.getItem('cv_vendedora_nome')||'ArznStoreSP';
-  var data=new Date().toLocaleDateString('pt-BR');
-  var pptx=new PptxGenJS();
-  pptx.layout='LAYOUT_16x9';
-  var s1=pptx.addSlide();
-  s1.background={color:'0A0D14'};
-  s1.addText('ArznStoreSP Personalizados',{x:.5,y:.5,w:9,h:.5,fontSize:13,color:'D14203',bold:true});
-  s1.addText('Proposta Comercial',{x:.5,y:1.3,w:9,h:1,fontSize:34,color:'FFFFFF',bold:true});
-  s1.addText(empresa+(seg?' — '+seg:''),{x:.5,y:2.5,w:9,h:.6,fontSize:18,color:'CCCCCC'});
-  s1.addText(data+' · '+nome,{x:.5,y:3.3,w:9,h:.4,fontSize:11,color:'777777'});
-  var s2=pptx.addSlide();
-  s2.background={color:'0A0D14'};
-  s2.addText('Produtos Selecionados',{x:.5,y:.3,w:9,h:.55,fontSize:20,color:'FFFFFF',bold:true});
-  var tRows=[[
-    {text:'Produto',options:{bold:true,color:'FFFFFF',fill:{color:'1A2030'}}},
-    {text:'Qtd',options:{bold:true,color:'FFFFFF',fill:{color:'1A2030'},align:'center'}},
-    {text:'Personalização',options:{bold:true,color:'FFFFFF',fill:{color:'1A2030'}}}
-  ]];
-  cart.forEach(function(c){
-    var p=PRODUTOS.find(function(x){return x.id===c.id;});
-    if(!p) return;
-    tRows.push([
-      {text:p.nome,options:{color:'EEEEEE'}},
-      {text:String(c.qty),options:{color:'EEEEEE',align:'center'}},
-      {text:c.pers||'—',options:{color:'AAAAAA'}}
-    ]);
-  });
-  s2.addTable(tRows,{x:.5,y:1.05,w:9,colW:[4.5,.8,3.7],fontSize:11,border:{type:'solid',color:'2A3050'},rowH:.38});
-  var s3=pptx.addSlide();
-  s3.background={color:'0A0D14'};
-  s3.addText('Mensagem WhatsApp',{x:.5,y:.3,w:9,h:.55,fontSize:20,color:'FFFFFF',bold:true});
-  s3.addShape(pptx.ShapeType.rect,{x:.4,y:1.0,w:.08,h:4.2,fill:{color:'D14203'}});
-  s3.addText(msg.slice(0,600),{x:.7,y:1.05,w:8.8,h:4.1,fontSize:9.5,color:'CCCCCC',valign:'top',wrap:true,lineSpacingMultiple:1.3});
-  var s4=pptx.addSlide();
-  s4.background={color:'0A0D14'};
-  s4.addText('Contato',{x:.5,y:.5,w:9,h:.55,fontSize:20,color:'FFFFFF',bold:true});
-  s4.addText('⚡ ArznStoreSP Personalizados',{x:.5,y:1.4,w:9,h:.5,fontSize:16,color:'D14203',bold:true});
-  s4.addText('WhatsApp: (11) 98801-1285',{x:.5,y:2.1,w:9,h:.45,fontSize:14,color:'CCCCCC'});
-  s4.addText('Instagram: @arznstoresp',{x:.5,y:2.7,w:9,h:.45,fontSize:14,color:'CCCCCC'});
-  s4.addText('Obrigado pelo interesse!',{x:.5,y:3.6,w:9,h:.5,fontSize:13,color:'888888'});
-  pptx.writeFile({fileName:'Proposta_'+empresa.replace(/[^a-z0-9À-ÿ]/gi,'_')+'.pptx'});
-}
-function copiarMsg(){
-  var msg=document.getElementById('msgFinal').textContent;
-  navigator.clipboard.writeText(msg).then(function(){toast('Mensagem copiada!','ok')}).catch(function(){toast('Erro ao copiar','err')});
-}
-function abrirWhatsApp(){
-  var msg=document.getElementById('msgFinal').textContent;
-  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
-}
-function salvarProposta(){
-  var empresa=document.getElementById('p-empresa').value.trim();
-  var seg=document.getElementById('p-segmento')?document.getElementById('p-segmento').value:'';
-  var acao=document.getElementById('p-acao')?document.getElementById('p-acao').value:'';
-  var obs=document.getElementById('p-obs')?document.getElementById('p-obs').value.trim():'';
-  if(!empresa||!cart.length){ toast('Preencha o cliente e selecione produtos','err'); return; }
-  var msg=buildMsg(empresa,seg,acao);
-  var hist=JSON.parse(localStorage.getItem('cv_hist')||'[]');
-  var prods=cart.map(function(c){
-    var p=PRODUTOS.find(function(x){return x.id===c.id});
-    return {nome:p?p.nome:c.id, qty:c.qty, pers:c.pers};
-  });
-  var entry={
-    id:'prop'+Date.now(),
-    data:new Date().toLocaleString('pt-BR'),
-    empresa:empresa,
-    segmento:seg,
-    acao:acao,
-    obs:obs,
-    produtos:prods,
-    mensagem:msg,
-    status:'Proposta enviada'
-  };
-  hist.unshift(entry);
-  if(hist.length>100) hist=hist.slice(0,100);
-  localStorage.setItem('cv_hist',JSON.stringify(hist));
-  contadorPropostas=hist.length;
-  localStorage.setItem('cv_props',contadorPropostas);
-  document.getElementById('ds-props').textContent=contadorPropostas;
-  toast('Proposta registrada! ('+contadorPropostas+' total)','ok');
-  renderHistorico();
-}
-function maskCNPJ(el){
-  var v=el.value.replace(/\D/g,'').slice(0,14);
-  if(v.length>12) v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5,8)+'/'+v.slice(8,12)+'-'+v.slice(12);
-  else if(v.length>8) v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5,8)+'/'+v.slice(8);
-  else if(v.length>5) v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5);
-  else if(v.length>2) v=v.slice(0,2)+'.'+v.slice(2);
-  el.value=v;
-}
-async function buscarCNPJ(){
-  var raw=(document.getElementById('cr-cnpj').value||'').replace(/\D/g,'');
-  var st=document.getElementById('cnpj-status');
-  if(raw.length<14){if(raw.length>0)st.innerHTML='<span style="color:var(--muted)">CNPJ incompleto</span>';return;}
-  st.innerHTML='<span style="color:var(--orange)">🔍 Buscando...</span>';
-  try{
-    var r=await fetch('https://brasilapi.com.br/api/cnpj/v1/'+raw);
-    if(!r.ok){st.innerHTML='<span style="color:#ef4444">CNPJ não encontrado</span>';return;}
-    var d=await r.json();
-    // Nome / Empresa
-    var nome=d.razao_social||d.nome_fantasia||'';
-    var fantasia=d.nome_fantasia||'';
-    var displayNome=fantasia&&fantasia!==nome?(fantasia+' ('+nome+')'):(nome);
-    if(nome){var el=document.getElementById('cr-empresa');if(el)el.value=displayNome;}
-    // Contato – primeiro sócio do QSA
-    var qsa=d.qsa||[];
-    if(qsa.length>0){var elC=document.getElementById('cr-contato');if(elC&&!elC.value)elC.value=qsa[0].nome_socio||'';}
-    // E-mail
-    if(d.email){var elE=document.getElementById('cr-email');if(elE&&!elE.value)elE.value=d.email;}
-    // WhatsApp / Telefone
-    var tel=(d.telefone||'').replace(/\D/g,'');
-    if(tel){var elW=document.getElementById('cr-wa');if(elW&&!elW.value)elW.value=tel;}
-    // Segmento – atividade principal
-    var atv=(d.atividade_principal&&d.atividade_principal[0])?d.atividade_principal[0].descricao:'';
-    if(atv){var elS=document.getElementById('cr-seg');if(elS&&!elS.value)elS.value=atv.slice(0,60);}
-    // OBS – endereço + dados extras
-    var endStr=[d.logradouro,d.numero,d.complemento,d.bairro,d.municipio,d.uf,d.cep?'CEP '+d.cep:''].filter(Boolean).join(', ');
-    var obsLines=[];
-    if(endStr) obsLines.push('Endereço: '+endStr);
-    // Inscrição Estadual
-    var ies=d.inscricoes_estaduais||[];
-    if(ies.length>0) ies.forEach(function(ie){if(ie.inscricao_estadual) obsLines.push('IE ('+ie.estado+'): '+ie.inscricao_estadual+(ie.ativa===false?' (inativa)':''));});
-    if(d.inscricao_municipal) obsLines.push('IM: '+d.inscricao_municipal);
-    if(d.capital_social) obsLines.push('Capital Social: R$ '+Number(d.capital_social).toLocaleString('pt-BR'));
-    if(d.data_inicio_atividade) obsLines.push('Início Atividade: '+d.data_inicio_atividade);
-    if(qsa.length>1) obsLines.push('Sócios: '+qsa.map(function(s){return s.nome_socio;}).join('; '));
-    var elObs=document.getElementById('cr-obs');
-    if(obsLines.length>0&&elObs&&!elObs.value) elObs.value=obsLines.join('\n');
-    // Status badge
-    var sit=d.descricao_situacao_cadastral||d.situacao||'';
-    var sitColor=sit.toLowerCase().includes('ativa')?'#22c55e':'#f59e0b';
-    st.innerHTML='<span style="color:'+sitColor+'">✓ '+esc(nome.slice(0,50))+(sit?' · '+esc(sit):'')+'</span>';
-    ri(document.querySelector('#modalCRM .modal'));
-  }catch(e){st.innerHTML='<span style="color:#ef4444">Erro ao buscar CNPJ</span>';}
-}
-function renderHistorico(){
-  var el=document.getElementById('histList');
-  if(!el) return;
-  var hist=JSON.parse(localStorage.getItem('cv_hist')||'[]');
-  if(!hist.length){
-    el.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px 0">Nenhuma proposta registrada ainda.</div>';
-    return;
-  }
-  el.innerHTML=hist.map(function(h,i){
-    var prods=h.produtos.map(function(p){return p.nome+' ('+p.qty+'x)'}).join(', ');
-    return '<div class="card" style="padding:12px;margin-bottom:8px">'
-      +'<div class="row" style="justify-content:space-between;margin-bottom:6px">'
-      +'<div style="font-weight:700">'+esc(h.empresa)+'</div>'
-      +'<span class="chip purple">'+esc(h.status)+'</span></div>'
-      +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px">'+esc(h.data)+(h.segmento?' · '+esc(h.segmento):'')+(h.acao?' · '+esc(h.acao):'')+'</div>'
-      +'<div style="font-size:12px;margin-bottom:8px">'+esc(prods)+'</div>'
-      +(h.obs?'<div style="font-size:12px;color:var(--muted);margin-bottom:8px">📝 '+esc(h.obs)+'</div>':'')
-      +'<div class="row" style="gap:6px;flex-wrap:wrap">'
-      +'<button class="btn btn-sm btn-ghost" onclick="copiarHistMsg('+i+')" style="font-size:11px;display:inline-flex;align-items:center;gap:4px">'+ic('copy',12)+'Copiar mensagem</button>'
-      +'<button class="btn btn-sm" onclick="deletarProposta('+i+')" style="font-size:11px;display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);color:#ef4444">'+ic('trash-2',12)+'Apagar</button>'
-      +'</div>'
-      +'</div>';
-  }).join('');
-  ri(el);
-}
-function copiarHistMsg(i){
-  var hist=JSON.parse(localStorage.getItem('cv_hist')||'[]');
-  if(!hist[i]) return;
-  navigator.clipboard.writeText(hist[i].mensagem).then(function(){toast('Mensagem copiada!','ok')}).catch(function(){toast('Erro ao copiar','err')});
-}
+      <!-- Funil de vendas -->
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px;margin-bottom:20px">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.35);margin:0 0 14px">⚡ Funil de Vendas</p>
+        <div style="display:flex;align-items:center;gap:0">
+          ${[
+            {label:'Contatos',val:crm.length,color:'#3b82f6'},
+            {label:'Propostas',val:propostas.length,color:'#D14203'},
+            {label:'Fechados',val:propostas.filter(p=>p.status==='fechado').length,color:'#22c55e'}
+          ].map((s,i,arr)=>{
+            const pct = arr[0].val>0 ? Math.round((s.val/arr[0].val)*100) : 0;
+            return `<div style="flex:1;text-align:center;${i<arr.length-1?'border-right:1px solid rgba(255,255,255,.07)':''}">
+              <div style="font-size:26px;font-weight:800;color:${s.color}">${s.val}</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.4);margin:2px 0 6px">${s.label}</div>
+              <div style="height:4px;background:rgba(255,255,255,.07);border-radius:4px;margin:0 16px">
+                <div style="height:4px;background:${s.color};border-radius:4px;width:${pct}%;opacity:.8"></div>
+              </div>
+              <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:4px">${i===0?'100%':pct+'% do total'}</div>
+            </div>`;
+          }).join('<div style="color:rgba(255,255,255,.2);font-size:18px;padding:0 4px">›</div>')}
+        </div>
+      </div>
 
-// ====================== PLAN 30 DIAS ======================
-function deletarProposta(i){
-  var hist=JSON.parse(localStorage.getItem('cv_hist')||'[]');
-  if(!hist[i]) return;
-  if(!confirm('Apagar esta proposta do histórico?')) return;
-  hist.splice(i,1);
-  localStorage.setItem('cv_hist',JSON.stringify(hist));
-  renderHistorico();
-  toast('Proposta apagada','ok');
-}
-function renderPlan(){
-  var done=PLANO_30.filter(function(d){return d.type==='day'&&d.status==='concluido'}).length;
-  var total=PLANO_30.filter(function(d){return d.type==='day'}).length;
-  document.getElementById('progLabel').textContent=done+'/'+total;
-  document.getElementById('progBar').style.width=(done/total*100).toFixed(1)+'%';
-  document.getElementById('ds-dias').textContent=done;
-  var html='';
-  PLANO_30.forEach(function(item,i){
-    if(item.type==='week'){
-      html+='<div class="week-header" style="background:linear-gradient(135deg,'+item.cor+',var(--orange))">'+item.label+'</div>';
-    } else {
-      var statusClass='s-'+item.status;
-      html+='<div class="day-card" id="day-'+item.num+'">'
-        +'<div class="day-head" onclick="toggleDay('+item.num+')">'
-        +'<div class="day-num">'+item.num+'</div>'
-        +'<div style="flex:1"><div style="font-weight:700;font-size:13px">'+item.tarefa+'</div>'
-        +(item.prods&&item.prods.length?'<div style="font-size:11px;color:var(--dim)">'+item.prods.join(' · ')+'</div>':'')
-        +'</div>'
-        +'<button class="day-status '+statusClass+'" onclick="event.stopPropagation();cycleStatus('+item.num+')">'+statusLabel(item.status)+'</button>'
-        +'</div>'
-        +'<div class="day-body">'
-        +(function(){
-          var d=item.desc;
-          var parts=d.split('Concluído quando:');
-          if(parts.length>1){
-            return '<p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">'+parts[0].trim()+'</p>'
-              +'<div style="background:var(--ok-lo);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:10px"><strong>Concluído quando:</strong> '+parts[1].trim()+'</div>';
-          }
-          return '<p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">'+d+'</p>';
-        })()
-        +(item.prods&&item.prods.length?'<div style="margin-bottom:10px">'+item.prods.map(function(x){return '<span class="chip muted" style="margin:2px">'+x+'</span>'}).join('')+'</div>':'')
-        +'<textarea placeholder="Anotações do dia..." style="font-size:12px" rows="2" onchange="saveDayObs('+item.num+',this.value)">'+item.obs+'</textarea>'
-        +'</div></div>';
-    }
-  });
-  document.getElementById('dayList').innerHTML=html;
-  ri(document.getElementById('page-trinta'));
-}
-function statusLabel(s){ return s==='concluido'?'Concluído':s==='andamento'?'Em andamento':'Pendente'; }
-function toggleDay(n){ var el=document.getElementById('day-'+n); if(el) el.classList.toggle('open'); }
-function cycleStatus(n){
-  var day=PLANO_30.find(function(d){return d.type==='day'&&d.num===n});
-  if(!day) return;
-  var s=day.status;
-  day.status=s==='pendente'?'andamento':s==='andamento'?'concluido':'pendente';
-  saveDayStatus(n,day.status);
-  renderPlan();
-}
-function saveDayObs(n,v){ var day=PLANO_30.find(function(d){return d.type==='day'&&d.num===n}); if(day) day.obs=v; }
+      <!-- Follow-up urgente -->
+      ${semResposta.length>0 ? `
+      <div style="background:rgba(209,66,3,.08);border:1px solid rgba(209,66,3,.25);border-radius:12px;padding:18px;margin-bottom:20px">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#D14203;margin:0 0 12px">🔔 Follow-up urgente — ${semResposta.length} proposta${semResposta.length>1?'s':''} sem resposta</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${semResposta.slice(0,5).map(p=>{
+            const dias = Math.floor((Date.now()-new Date(p.data||p.created_at).getTime())/(1000*60*60*24));
+            return `<div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.04);border-radius:8px;padding:10px 14px">
+              <div>
+                <span style="font-size:13px;font-weight:700;color:#fff">${p.empresa||p.cliente||'Cliente'}</span>
+                ${p.segmento ? `<span style="font-size:11px;color:rgba(255,255,255,.4);margin-left:8px">${p.segmento}</span>` : ''}
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;color:#ff6b35;font-weight:700">${dias} dias</span>
+                <button onclick="navigator.clipboard&&navigator.clipboard.writeText('Olá! Tudo bem? Passando para saber se tiveram a oportunidade de avaliar a proposta que enviamos. Ficou alguma dúvida?')" style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:6px;color:#25d366;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer">Copiar msg</button>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>` : `
+      <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:18px">✅</span>
+        <p style="font-size:13px;color:rgba(255,255,255,.6);margin:0">Nenhum follow-up pendente. Todas as propostas recentes estão em dia!</p>
+      </div>`}
 
-// ====================== CRM ======================
-function renderCRM(){
+      <!-- Ações rápidas -->
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px;margin-bottom:20px">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.35);margin:0 0 12px">🚀 Ações rápidas</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button onclick="navigate('proposta')" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--accent,#D14203);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;text-align:left">
+            <span style="font-size:18px">📋</span><span>Nova proposta</span>
+          </button>
+          <button onclick="navigate('crm')" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.8);font-size:13px;font-weight:700;cursor:pointer;text-align:left">
+            <span style="font-size:18px">👥</span><span>Ver CRM</span>
+          </button>
+          <button onclick="navigate('catalogo')" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.8);font-size:13px;font-weight:700;cursor:pointer;text-align:left">
+            <span style="font-size:18px">📦</span><span>Catálogo (${totalSkus} produtos)</span>
+          </button>
+          <button onclick="navigate('textos')" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.8);font-size:13px;font-weight:700;cursor:pointer;text-align:left">
+            <span style="font-size:18px">💬</span><span>Textos prontos</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Venda rápida compacta -->
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.35);margin:0 0 12px">⭐ Produtos em destaque — Adicionar direto na proposta</p>
+        <div id="dash-produtos-rapidos" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+          <p style="color:rgba(255,255,255,.3);font-size:12px">Carregando...</p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Carrega produtos em destaque
+  const prods = (typeof PRODUTOS!=='undefined'?PRODUTOS:window.PRODUTOS||[]).filter(p=>p.ativo!==false).slice(0,8);
+  const grid = document.getElementById('dash-produtos-rapidos');
+  if(grid && prods.length>0){
+    grid.innerHTML = prods.map(p=>`
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;overflow:hidden;cursor:pointer" onclick="navigate('proposta')">
+        <img src="${p.imagem||p.img||''}" alt="${p.nome}" style="width:100%;aspect-ratio:1;object-fit:cover;background:#1a1a1a" onerror="this.style.display='none'">
+        <div style="padding:8px">
+          <p style="font-size:11px;font-weight:700;color:rgba(255,255,255,.8);margin:0 0 2px;line-height:1.3">${p.nome||'Produto'}</p>
+          <p style="font-size:10px;color:rgba(255,255,255,.3);margin:0">${p.codigo||''}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+}function renderCRM(){
   var q=(document.getElementById('crmSearch')?document.getElementById('crmSearch').value:'').toLowerCase();
   var sf=document.getElementById('crmFilter')?document.getElementById('crmFilter').value:'';
   document.getElementById('crmBadge').textContent=contacts.length;

@@ -34,7 +34,7 @@
      like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=4fea2b73-497e-4cec-9853-e9978732946a
      Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<!-- v3 --><title>Central de Vendas Â· ArznStoreSP</title>
+<!-- v3 --><title>Central de Vendas · ArznStoreSP</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
@@ -1490,6 +1490,162 @@ function saveAdminConfig(){
   localStorage.setItem('cv_alan_wa',aw);
   if(sp) localStorage.setItem('cv_admin_pwd',sp);
   toast('Configurações salvas â','ok');
+}
+
+// ====================== CATÁLOGO ======================
+function closeModal(id){
+  var el=document.getElementById(id);
+  if(el) el.hidden=true;
+}
+
+function openProd(id){
+  var p=PRODUTOS.find(function(x){return x.id===id;});
+  if(!p) return;
+  currentProd=p;
+  document.getElementById('mpTitle').textContent=p.nome;
+  document.getElementById('mpCat').textContent=p.cat;
+  document.getElementById('mpDesc').textContent=p.desc||'';
+  document.getElementById('mpMin').textContent=p.minQtd||'Sob consulta';
+  document.getElementById('mpPrazo').textContent=p.prazo||'Sob consulta';
+  document.getElementById('mpArgs').textContent=p.args||'';
+  var imgEl=document.getElementById('mpImg');
+  if(imgEl){ if(p.imagem){imgEl.src=p.imagem;imgEl.hidden=false;}else{imgEl.hidden=true;} }
+  var chips=document.getElementById('mpChips');
+  if(chips){
+    var tags=(p.indicado||[]).concat(p.personalizacoes||[]);
+    chips.innerHTML=tags.map(function(t){return '<span class="chip">'+esc(t)+'</span>';}).join('');
+  }
+  // price
+  var precos=JSON.parse(localStorage.getItem('cv_precos')||'{}');
+  var pInfo=precos[p.id]||{};
+  var priceEl=document.getElementById('mpPreco');
+  if(priceEl){
+    var vb=pInfo.precoBase||p.precoBase||'';
+    priceEl.textContent=vb?'A partir de R$ '+vb:'Sob consulta';
+  }
+  document.getElementById('modalProd').hidden=false;
+}
+
+function addToCart(prodOrId){
+  var p=typeof prodOrId==='string'?PRODUTOS.find(function(x){return x.id===prodOrId;}):prodOrId;
+  if(!p) return;
+  var already=cart.find(function(x){return x.id===p.id;});
+  if(already){ toast('Produto já está na proposta','warn'); return; }
+  cart.push({id:p.id,nome:p.nome,cat:p.cat,imagem:p.imagem||'',precoBase:p.precoBase||''});
+  localStorage.setItem('cv_cart',JSON.stringify(cart));
+  renderCart();
+  toast(p.nome+' adicionado à proposta','ok');
+}
+
+function removeFromCart(id){
+  cart=cart.filter(function(x){return x.id!==id;});
+  localStorage.setItem('cv_cart',JSON.stringify(cart));
+  renderCart();
+  renderCatalog();
+}
+
+function clearFilters(){
+  var si=document.getElementById('searchInput');
+  if(si) si.value='';
+  filterActive='';
+  renderCatalog();
+}
+
+function renderCart(){
+  var el=document.getElementById('cartItems');
+  var badge=document.getElementById('cartCount');
+  if(badge) badge.textContent=cart.length;
+  if(!el) return;
+  if(cart.length===0){
+    el.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px 0">Nenhum produto. Vá ao catálogo e adicione.</div>';
+    return;
+  }
+  el.innerHTML=cart.map(function(p){
+    return '<div class="card" style="display:flex;align-items:center;gap:12px;padding:10px 14px">'
+      +(p.imagem?'<img src="'+p.imagem+'" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0">':'<div style="width:44px;height:44px;background:var(--surface2,#1a2030);border-radius:6px;flex-shrink:0"></div>')
+      +'<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.nome)+'</div>'
+      +'<div style="font-size:12px;color:var(--muted)">'+esc(p.cat)+'</div></div>'
+      +'<button onclick="removeFromCart(\''+p.id+'\')" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px" title="Remover"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>'
+      +'</div>';
+  }).join('');
+}
+
+function renderHistorico(){
+  var el=document.getElementById('histList');
+  if(!el) return;
+  var hist=JSON.parse(localStorage.getItem('cv_hist')||'[]');
+  if(hist.length===0){
+    el.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px 0">Nenhuma proposta registrada ainda.</div>';
+    return;
+  }
+  el.innerHTML=hist.slice().reverse().map(function(h){
+    var d=h.data?new Date(h.data).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+    return '<div class="card" style="padding:12px 14px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'
+      +'<div><div style="font-weight:600;font-size:14px">'+esc(h.cliente||'Cliente')+'</div>'
+      +'<div style="font-size:12px;color:var(--muted)">'+d+(h.produtos?' · '+h.produtos+' produto(s)':'')+'</div></div>'
+      +(h.wa?'<a href="https://wa.me/'+h.wa+'" target="_blank" class="btn btn-sm" style="flex-shrink:0">WhatsApp</a>':'')
+      +'</div></div>';
+  }).join('');
+}
+
+function renderCatalog(){
+  var grid=document.getElementById('catalogGrid');
+  var chipsEl=document.getElementById('filterChips');
+  if(!grid) return;
+
+  // Build category list
+  var cats=[];
+  PRODUTOS.forEach(function(p){ if(p.visivelVendedor!==false && cats.indexOf(p.cat)===-1) cats.push(p.cat); });
+  cats.sort();
+
+  // Render filter chips
+  if(chipsEl){
+    chipsEl.innerHTML=['<button class="chip'+(filterActive===''?' active':'')+'" onclick="filterActive=\'\';renderCatalog()" style="cursor:pointer">Todos</button>']
+      .concat(cats.map(function(c){
+        var icon=CAT_IC[c]||'tag';
+        return '<button class="chip'+(filterActive===c?' active':'')+'" onclick="filterActive=\''+esc(c)+'\';renderCatalog()" style="cursor:pointer">'
+          +'<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'13\' height=\'13\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><use href=\'#icon-'+icon+'\'/></svg> '+esc(c)+'</button>';
+      })).join('');
+  }
+
+  var q=(document.getElementById('searchInput')||{}).value||'';
+  q=q.toLowerCase().trim();
+
+  var visible=PRODUTOS.filter(function(p){
+    if(p.visivelVendedor===false) return false;
+    if(filterActive && p.cat!==filterActive) return false;
+    if(q){
+      var hay=(p.nome+' '+p.cat+' '+(p.desc||'')+' '+(p.indicado||[]).join(' ')).toLowerCase();
+      if(hay.indexOf(q)===-1) return false;
+    }
+    return true;
+  });
+
+  if(visible.length===0){
+    grid.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:32px 0;grid-column:1/-1">Nenhum produto encontrado.</div>';
+    return;
+  }
+
+  var precos=JSON.parse(localStorage.getItem('cv_precos')||'{}');
+
+  grid.innerHTML=visible.map(function(p){
+    var inCart=cart.some(function(x){return x.id===p.id;});
+    var pInfo=precos[p.id]||{};
+    var vb=pInfo.precoBase||p.precoBase||'';
+    var badge=p.status==='venda-rapida'?'<span class="chip" style="font-size:10px;background:var(--orange);color:#fff;padding:2px 7px;border-radius:99px">⚡ Venda Rápida</span>':'';
+    var nivelColor=p.nivel==='baixo'?'#4ade80':'#facc15';
+    return '<div class="card" style="cursor:pointer;overflow:hidden;display:flex;flex-direction:column" onclick="openProd(\''+p.id+'\')">'
+      +(p.imagem?'<img src="'+p.imagem+'" style="width:100%;height:140px;object-fit:cover;border-radius:6px 6px 0 0;margin:-0px">':'<div style="height:100px;background:var(--surface2,#1a2030);border-radius:6px 6px 0 0;display:flex;align-items:center;justify-content:center"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'var(--muted)\' stroke-width=\'1.5\'><rect width=\'18\' height=\'18\' x=\'3\' y=\'3\' rx=\'2\'/><path d=\'m9 9 6 6m0-6-6 6\'/></svg></div>')
+      +'<div style="padding:12px;flex:1;display:flex;flex-direction:column;gap:6px">'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+badge
+      +'<span style="font-size:10px;color:'+nivelColor+';font-weight:600">'+esc(p.nivel==='baixo'?'Custo Baixo':'Custo Médio')+'</span></div>'
+      +'<div style="font-weight:700;font-size:14px;line-height:1.3">'+esc(p.nome)+'</div>'
+      +'<div style="font-size:12px;color:var(--muted)">'+esc(p.cat)+'</div>'
+      +(vb?'<div style="font-size:13px;font-weight:600;color:var(--orange)">A partir de R$ '+esc(vb)+'</div>':'')
+      +'<button onclick="event.stopPropagation();'+(inCart?'':'addToCart(\''+p.id+'\')')+'" style="margin-top:auto;padding:7px 0;border-radius:7px;border:none;cursor:'+(inCart?'default':'pointer')+';font-weight:600;font-size:13px;background:'+(inCart?'var(--surface2,#1a2030)':'var(--orange)')+';color:'+(inCart?'var(--muted)':'#fff')+'">'+(inCart?'✓ Na proposta':'+ Adicionar')+'</button>'
+      +'</div></div>';
+  }).join('');
 }
 
 // ====================== UTIL ======================

@@ -7,6 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 /* ===================== TOKENS ===================== */
 :root {
@@ -1863,73 +1865,181 @@ function gerarMensagem(){
   renderHistorico();
 }
 
-// --- Proposta: PDF real via html2pdf.js ---
-var _html2pdfLoading=false;
+// --- Proposta: PDF real via jsPDF + AutoTable ---
+var _pdfGerando=false;
 function gerarPDFDireto(){
   if(cart.length===0){ toast('Adicione produtos à proposta primeiro.','err'); return; }
+  if(_pdfGerando){ toast('Aguarde, gerando PDF…','ok'); return; }
+
+  // Verificar se jsPDF está disponível
+  var jsPDFLib = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+  if(!jsPDFLib){
+    toast('Biblioteca PDF não carregou. Verifique sua conexão e tente novamente.','err');
+    return;
+  }
+
   var empresa=document.getElementById('p-empresa').value.trim()||'Cliente';
   var segmento=document.getElementById('p-segmento').value.trim();
+  var acao=document.getElementById('p-acao') ? document.getElementById('p-acao').value : '';
+  var obs=document.getElementById('p-obs') ? document.getElementById('p-obs').value.trim() : '';
   var modo=document.getElementById('p-modo-preco').value;
-  var nome=localStorage.getItem('cv_vendedora_nome')||'ArznStoreSP';
-  var data=new Date().toLocaleDateString('pt-BR');
-  var linhas=cart.map(function(p){
-    var pObj=PRODUTOS.find(function(x){return x.id===p.id;});
-    if(!pObj) return '';
-    var preco=getPrecoTier(pObj,50);
-    var precoCell=(modo!=='nao'&&preco>0)?'R$ '+preco.toFixed(2).replace('.',','):'-';
-    return '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee">'+pObj.nome+'</td>'
-      +'<td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666">'+pObj.cat+'</td>'
-      +'<td style="padding:8px 12px;border-bottom:1px solid #eee">'+(pObj.minQty||1)+' un</td>'
-      +'<td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right">'+precoCell+'</td></tr>';
-  }).join('');
-  var htmlContent='<div style="font-family:Arial,sans-serif;color:#222;max-width:700px;margin:0 auto;padding:32px">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #D14203">'
-    +'<div style="font-size:22px;font-weight:900;color:#D14203">ArznStoreSP</div>'
-    +'<div style="text-align:right;font-size:13px;color:#666">Data: '+data+'<br>Proposta para: <strong>'+empresa+'</strong></div></div>'
-    +'<h2 style="margin:0 0 6px;font-size:18px">Proposta Comercial</h2>'
-    +(segmento?'<p style="color:#666;margin:0 0 20px">Segmento: '+segmento+'</p>':'<br>')
-    +'<table style="width:100%;border-collapse:collapse"><thead><tr>'
-    +'<th style="background:#D14203;color:#fff;padding:10px 12px;text-align:left">Produto</th>'
-    +'<th style="background:#D14203;color:#fff;padding:10px 12px;text-align:left">Categoria</th>'
-    +'<th style="background:#D14203;color:#fff;padding:10px 12px;text-align:left">Qtd Mínima</th>'
-    +'<th style="background:#D14203;color:#fff;padding:10px 12px;text-align:right">Preço/un</th>'
-    +'</tr></thead><tbody>'+linhas+'</tbody></table>'
-    +'<p style="margin-top:20px;font-size:12px;color:#888">* Valores sujeitos a confirmação. Prazo médio: 7 dias úteis após aprovação de arte.</p>'
-    +'<p style="margin-top:12px;font-size:12px;color:#888">Vendedora: '+nome+' | @arznstoresp | (11) 98801-1285</p>'
-    +'</div>';
-  // Registrar no histórico antes de gerar
-  var hist=JSON.parse(localStorage.getItem('cv_hist')||'[]');
-  hist.push({id:Date.now().toString(),cliente:empresa,segmento:segmento,produtos:cart.length,data:new Date().toISOString(),status:'Enviado',wa:'',msg:'[PDF gerado]'});
-  localStorage.setItem('cv_hist',JSON.stringify(hist));
-  contadorPropostas=hist.length;
-  localStorage.setItem('cv_props',contadorPropostas);
-  var dsProps=document.getElementById('ds-props'); if(dsProps) dsProps.textContent=contadorPropostas;
-  // Gerar PDF real
-  var nomeArq='proposta_'+empresa.replace(/\s+/g,'_')+'.pdf';
-  function doGerar(){
-    var elem=document.createElement('div');
-    elem.innerHTML=htmlContent;
-    document.body.appendChild(elem);
-    html2pdf().set({margin:10,filename:nomeArq,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(elem).save().then(function(){
-      document.body.removeChild(elem);
-      toast('PDF gerado com sucesso!','ok');
-    }).catch(function(){
-      document.body.removeChild(elem);
-      toast('Erro ao gerar PDF','err');
+  var nomeVendedora=localStorage.getItem('cv_vendedora_nome')||'ArznStoreSP';
+  var dataStr=new Date().toLocaleDateString('pt-BR');
+  var nomeArq='Proposta_ArznStoreSP_'+empresa.replace(/[^a-zA-Z0-9]/g,'_')+'.pdf';
+
+  _pdfGerando=true;
+  try {
+    var doc=new jsPDFLib({unit:'mm',format:'a4',orientation:'portrait'});
+    var pageW=doc.internal.pageSize.getWidth();
+    var pageH=doc.internal.pageSize.getHeight();
+    var margin=14;
+    var contentW=pageW-margin*2;
+
+    // --- Cabeçalho ---
+    doc.setFillColor(209,66,3); // #D14203
+    doc.rect(0,0,pageW,28,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(20);
+    doc.setFont('helvetica','bold');
+    doc.text('ArznStoreSP',margin,11);
+    doc.setFontSize(9);
+    doc.setFont('helvetica','normal');
+    doc.text('Personalizados',margin,17);
+    doc.setFontSize(9);
+    doc.text('@arznstoresp  |  (11) 98801-1285',margin,22);
+
+    // Título proposta (direita)
+    doc.setFontSize(11);
+    doc.setFont('helvetica','bold');
+    doc.text('PROPOSTA COMERCIAL',pageW-margin,10,{align:'right'});
+    doc.setFontSize(8);
+    doc.setFont('helvetica','normal');
+    doc.text('Data: '+dataStr,pageW-margin,16,{align:'right'});
+    doc.text('Vendedora: '+nomeVendedora,pageW-margin,21,{align:'right'});
+
+    // --- Dados do Cliente ---
+    var y=36;
+    doc.setFillColor(245,245,245);
+    doc.roundedRect(margin,y-4,contentW,segmento?18:12,2,2,'F');
+    doc.setTextColor(50,50,50);
+    doc.setFontSize(10);
+    doc.setFont('helvetica','bold');
+    doc.text('Cliente:',margin+3,y+1);
+    doc.setFont('helvetica','normal');
+    doc.text(empresa,margin+22,y+1);
+    if(segmento){
+      doc.setFont('helvetica','bold');
+      doc.text('Segmento:',margin+3,y+8);
+      doc.setFont('helvetica','normal');
+      doc.text(segmento,margin+28,y+8);
+    }
+    if(acao){
+      doc.setFont('helvetica','bold');
+      doc.text('Ação:',margin+3,y+14);
+      doc.setFont('helvetica','normal');
+      doc.text(acao,margin+18,y+14);
+    }
+
+    y+=(segmento?20:14);
+
+    // --- Título tabela ---
+    doc.setTextColor(50,50,50);
+    doc.setFontSize(10);
+    doc.setFont('helvetica','bold');
+    doc.text('Produtos Selecionados',margin,y+4);
+    y+=8;
+
+    // --- Tabela de produtos ---
+    var rows=cart.map(function(p){
+      var pObj=PRODUTOS.find(function(x){return x.id===p.id;});
+      if(!pObj) return null;
+      var preco=getPrecoTier(pObj,50);
+      var precoStr=(modo!=='nao'&&preco>0)?'R$ '+preco.toFixed(2).replace('.',','):'-';
+      return [pObj.nome, pObj.cat||'-', (pObj.minQty||1)+' un', precoStr];
+    }).filter(Boolean);
+
+    doc.autoTable({
+      startY: y,
+      margin: {left:margin, right:margin},
+      head: [['Produto','Categoria','Qtd Mínima','Preço/un']],
+      body: rows,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [209,66,3],
+        textColor: 255,
+        fontStyle: 'bold',
+        fontSize: 9,
+        halign: 'left'
+      },
+      columnStyles: {
+        0: {cellWidth:'auto', fontSize:9},
+        1: {cellWidth:38, fontSize:9, textColor:[80,80,80]},
+        2: {cellWidth:28, fontSize:9, halign:'center'},
+        3: {cellWidth:28, fontSize:9, halign:'right'}
+      },
+      alternateRowStyles: {fillColor:[252,252,252]},
+      styles: {fontSize:9, cellPadding:3},
+      didDrawPage: function(data){ y=data.cursor.y; }
     });
-  }
-  if(window.html2pdf){
-    doGerar();
-  } else if(!_html2pdfLoading) {
-    _html2pdfLoading=true;
-    toast('Carregando gerador de PDF…','ok');
-    var s=document.createElement('script');
-    s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-    s.onload=function(){ _html2pdfLoading=false; doGerar(); };
-    s.onerror=function(){ _html2pdfLoading=false; toast('Não foi possível carregar o gerador de PDF. Verifique sua conexão.','err'); };
-    document.head.appendChild(s);
-  } else {
-    toast('Aguarde, carregando gerador de PDF…','ok');
+
+    y=doc.lastAutoTable.finalY+6;
+
+    // --- Observações ---
+    if(obs){
+      doc.setFillColor(255,248,230);
+      doc.roundedRect(margin,y,contentW,14,2,2,'F');
+      doc.setTextColor(100,60,0);
+      doc.setFontSize(8);
+      doc.setFont('helvetica','bold');
+      doc.text('Observação:',margin+3,y+5);
+      doc.setFont('helvetica','normal');
+      var obsLines=doc.splitTextToSize(obs,contentW-26);
+      doc.text(obsLines,margin+28,y+5);
+      y+=16+Math.max(0,(obsLines.length-1)*4);
+    }
+
+    // --- Nota de rodapé da proposta ---
+    doc.setTextColor(130,130,130);
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica','italic');
+    doc.text('* Valores sujeitos a confirmação. Prazo médio: 7 dias úteis após aprovação de arte.',margin,y+4);
+    doc.text('* Amostras e personalizações disponíveis mediante consulta.',margin,y+9);
+
+    // --- Rodapé da página ---
+    doc.setFillColor(209,66,3);
+    doc.rect(0,pageH-12,pageW,12,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(8);
+    doc.setFont('helvetica','normal');
+    doc.text('ArznStoreSP Personalizados  |  @arznstoresp  |  WhatsApp: (11) 98801-1285',pageW/2,pageH-5,{align:'center'});
+
+    // --- Salvar ---
+    doc.save(nomeArq);
+
+    // Registrar no histórico SOMENTE após geração bem-sucedida
+    var hist=JSON.parse(localStorage.getItem('cv_hist')||'[]');
+    hist.push({
+      id:Date.now().toString(),
+      cliente:empresa,
+      segmento:segmento,
+      produtos:cart.length,
+      data:new Date().toISOString(),
+      status:'Enviado',
+      wa:'',
+      msg:'[PDF gerado]'
+    });
+    localStorage.setItem('cv_hist',JSON.stringify(hist));
+    contadorPropostas=hist.length;
+    localStorage.setItem('cv_props',contadorPropostas);
+    var dsProps=document.getElementById('ds-props'); if(dsProps) dsProps.textContent=contadorPropostas;
+    renderHistorico();
+
+    toast('PDF gerado com sucesso!','ok');
+  } catch(err){
+    console.error('[PDF] Erro ao gerar PDF:',err);
+    toast('Erro ao gerar PDF: '+(err&&err.message||'falha desconhecida')+'. Tente novamente.','err');
+  } finally {
+    _pdfGerando=false;
   }
 }
 

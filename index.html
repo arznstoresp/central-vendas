@@ -1082,207 +1082,180 @@ function gotoPage(id, btn){
 
 // ====================== DASHBOARD ======================
 function renderDashboard() {
-  const nome = localStorage.getItem('cv_vendedora_nome') || '';
-  const props = JSON.parse(localStorage.getItem('cv_props') || '[]');
-  const contacts = JSON.parse(localStorage.getItem('cv_contacts') || '[]');
-
-  // Stats
-  const today = new Date().toISOString().slice(0,10);
-  const propHoje = props.filter(p => (p.data||'').slice(0,10) === today).length;
-  const propAberto = props.filter(p => (p.status||'').toLowerCase() === 'aberto' || (p.status||'').toLowerCase() === 'em aberto' || (p.status||'').toLowerCase() === 'enviado').length;
-  const propFechado = props.filter(p => (p.status||'').toLowerCase() === 'fechado' || (p.status||'').toLowerCase() === 'ganho').length;
-
-  // Urgentes = contacts not updated in 2+ days
-  const now = Date.now();
-  const urgentes = contacts.filter(c => {
-    if (!c.atualizado_em) return true;
-    const diff = (now - new Date(c.atualizado_em).getTime()) / 86400000;
-    return diff >= 2;
-  }).sort((a,b) => {
-    const da = a.atualizado_em ? new Date(a.atualizado_em).getTime() : 0;
-    const db = b.atualizado_em ? new Date(b.atualizado_em).getTime() : 0;
-    return da - db;
+  var nome = localStorage.getItem('cv_vendedora_nome') || '';
+  var props = JSON.parse(localStorage.getItem('cv_props') || '[]');
+  var contacts = JSON.parse(localStorage.getItem('cv_contacts') || '[]');
+  var today = new Date().toISOString().slice(0,10);
+  var propHoje = props.filter(function(p){ return (p.data||'').slice(0,10)===today; }).length;
+  var propAberto = props.filter(function(p){ var s=(p.status||'').toLowerCase(); return s==='aberto'||s==='em aberto'||s==='enviado'; }).length;
+  var propFechado = props.filter(function(p){ var s=(p.status||'').toLowerCase(); return s==='fechado'||s==='ganho'; }).length;
+  var now = Date.now();
+  var urgentes = contacts.filter(function(c){
+    if(!c.atualizado_em) return true;
+    return (now - new Date(c.atualizado_em).getTime())/86400000 >= 2;
+  }).sort(function(a,b){
+    var da=a.atualizado_em?new Date(a.atualizado_em).getTime():0;
+    var db=b.atualizado_em?new Date(b.atualizado_em).getTime():0;
+    return da-db;
   });
 
-  // 7-day bar chart data
-  const days = [];
-  for (let i=6; i>=0; i--) {
-    const d = new Date(); d.setDate(d.getDate()-i);
-    const key = d.toISOString().slice(0,10);
-    const label = d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','');
-    const count = props.filter(p => (p.data||'').slice(0,10) === key).length;
-    days.push({label, count, key});
+  // 7-day chart
+  var days=[], maxCount=1;
+  for(var i=6;i>=0;i--){
+    var d=new Date(); d.setDate(d.getDate()-i);
+    var key=d.toISOString().slice(0,10);
+    var lbl=d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','');
+    var cnt=props.filter(function(p){return (p.data||'').slice(0,10)===key;}).length;
+    days.push({label:lbl,count:cnt,key:key});
+    if(cnt>maxCount) maxCount=cnt;
   }
-  const maxCount = Math.max(...days.map(d=>d.count), 1);
-  const barW = 30, barGap = 10, chartH = 80, totalW = days.length*(barW+barGap)-barGap;
-  const bars = days.map((d,i) => {
-    const h = Math.round((d.count/maxCount)*chartH) || 2;
-    const x = i*(barW+barGap);
-    const fill = d.key === today ? '#D14203' : '#2A3650';
-    return `<rect x="${x}" y="${chartH-h}" width="${barW}" height="${h}" rx="4" fill="${fill}"/>
-<text x="${x+barW/2}" y="${chartH+14}" text-anchor="middle" font-size="9" fill="var(--muted)">${d.label}</text>
-${d.count>0?`<text x="${x+barW/2}" y="${chartH-h-4}" text-anchor="middle" font-size="9" fill="var(--text)">${d.count}</text>`:''}
-`;
-  }).join('');
+  var barW=30,barGap=10,chartH=80;
+  var totalW=days.length*(barW+barGap)-barGap;
+  var bars='';
+  for(var j=0;j<days.length;j++){
+    var dd=days[j];
+    var h=Math.round((dd.count/maxCount)*chartH)||2;
+    var xpos=j*(barW+barGap);
+    var fill=dd.key===today?'#D14203':'#2A3650';
+    bars+='<rect x="'+xpos+'" y="'+(chartH-h)+'" width="'+barW+'" height="'+h+'" rx="4" fill="'+fill+'"/>';
+    bars+='<text x="'+(xpos+barW/2)+'" y="'+(chartH+14)+'" text-anchor="middle" font-size="9" fill="var(--muted)">'+dd.label+'</text>';
+    if(dd.count>0) bars+='<text x="'+(xpos+barW/2)+'" y="'+(chartH-h-4)+'" text-anchor="middle" font-size="9" fill="var(--text)">'+dd.count+'</text>';
+  }
 
   // Urgentes HTML
-  const urgHTML = urgentes.length === 0
-    ? '<p style="color:var(--muted);font-size:13px;padding:8px 0">Nenhum contato urgente — tudo em dia! 🟢</p>'
-    : urgentes.slice(0,5).map(c => {
-        const diff = c.atualizado_em ? Math.floor((now - new Date(c.atualizado_em).getTime())/86400000) : 999;
-        const dot = diff >= 3 ? '#E53935' : '#FDD835';
-        const dias = diff === 999 ? 'nunca' : diff === 0 ? 'hoje' : diff === 1 ? '1 dia' : diff+' dias';
-        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-  <span style="width:10px;height:10px;border-radius:50%;background:${dot};flex-shrink:0"></span>
-  <div style="flex:1;min-width:0">
-    <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(c.empresa||c.contato||'—')}</div>
-    <div style="font-size:11px;color:var(--muted)">${escHtml(c.interesse||c.seg||'')} · último contato: ${dias}</div>
-  </div>
-  ${c.wa?`<a href="https://wa.me/${c.wa.replace(/\D/g,'')}" target="_blank" style="color:#25D366;font-size:18px;text-decoration:none">📱</a>`:''}
-</div>`;
-      }).join('');
+  var urgHTML='';
+  if(urgentes.length===0){
+    urgHTML='<p style="color:var(--muted);font-size:13px;padding:8px 0">Nenhum contato urgente — tudo em dia! 🟢</p>';
+  } else {
+    var top=urgentes.slice(0,5);
+    for(var k=0;k<top.length;k++){
+      var c=top[k];
+      var diff=c.atualizado_em?Math.floor((now-new Date(c.atualizado_em).getTime())/86400000):999;
+      var dot=diff>=3?'#E53935':'#FDD835';
+      var dias=diff===999?'nunca':diff===0?'hoje':diff===1?'1 dia':diff+' dias';
+      var waLink=c.wa?'<a href="https://wa.me/'+c.wa.replace(/\D/g,'')+'" target="_blank" onclick="event.stopPropagation()" style="color:#25D366;font-size:18px;text-decoration:none">📱</a>':'';
+      urgHTML+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">';
+      urgHTML+='<span style="width:10px;height:10px;border-radius:50%;background:'+dot+';flex-shrink:0"></span>';
+      urgHTML+='<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">'+escHtml(c.empresa||c.contato||'—')+'</div>';
+      urgHTML+='<div style="font-size:11px;color:var(--muted)">'+escHtml(c.interesse||c.seg||'')+' · último: '+dias+'</div></div>'+waLink+'</div>';
+    }
+    if(urgentes.length>5) urgHTML+='<div style="font-size:11px;color:var(--muted);text-align:center;padding-top:6px">+'+(urgentes.length-5)+' mais no CRM</div>';
+  }
 
-  const saudacao = nome ? `Olá, ${escHtml(nome)}! 👋` : 'Bem-vinda! 👋';
-  const hora = new Date().getHours();
-  const periodo = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+  // Last proposals
+  var lastProps='';
+  if(props.length>0){
+    var recent=props.slice(-5).reverse();
+    var pHTML='';
+    for(var m=0;m<recent.length;m++){
+      var p=recent[m];
+      var pStatus=(p.status||'').toLowerCase();
+      var pColor=pStatus==='fechado'?'#1B5E20':pStatus==='aberto'?'#0D47A1':'#37474F';
+      pHTML+='<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">';
+      pHTML+='<div><div style="font-size:13px;font-weight:600">'+escHtml(p.nome||p.name||'—')+'</div>';
+      pHTML+='<div style="font-size:11px;color:var(--muted)">'+(p.data?new Date(p.data).toLocaleDateString('pt-BR'):'')+'</div></div>';
+      pHTML+='<span style="font-size:11px;padding:3px 8px;border-radius:20px;background:'+pColor+';color:#fff">'+escHtml(p.status||'—')+'</span></div>';
+    }
+    lastProps='<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted)">📝 ÚLTIMAS PROPOSTAS</div>'+pHTML+'</div>';
+  }
 
-  document.getElementById('page-dashboard').innerHTML = `
-<div style="max-width:700px;margin:0 auto;padding:0 4px">
-  <div style="margin-bottom:20px">
-    <h2 style="margin:0 0 2px;font-size:22px">${periodo}, ${saudacao}</h2>
-    <p style="margin:0;color:var(--muted);font-size:13px">${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</p>
-  </div>
+  var hora=new Date().getHours();
+  var periodo=hora<12?'Bom dia':hora<18?'Boa tarde':'Boa noite';
+  var saudacao=nome?periodo+', '+escHtml(nome)+'! 👋':periodo+'! 👋';
+  var datStr=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
 
-  <div class="grid4" style="margin-bottom:20px">
-    <div class="card" style="text-align:center;padding:14px 8px">
-      <div style="font-size:28px;font-weight:700;color:#D14203">${propHoje}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">Propostas Hoje</div>
-    </div>
-    <div class="card" style="text-align:center;padding:14px 8px">
-      <div style="font-size:28px;font-weight:700;color:#4FC3F7">${propAberto}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">Em Aberto</div>
-    </div>
-    <div class="card" style="text-align:center;padding:14px 8px">
-      <div style="font-size:28px;font-weight:700;color:#66BB6A">${propFechado}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">Fechados</div>
-    </div>
-    <div class="card" style="text-align:center;padding:14px 8px">
-      <div style="font-size:28px;font-weight:700;color:#E53935">${urgentes.length}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">Urgentes</div>
-    </div>
-  </div>
-
-  <div class="grid2" style="margin-bottom:20px">
-    <div class="card">
-      <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--muted)">📊 PROPOSTAS — ÚLTIMOS 7 DIAS</div>
-      <svg width="100%" viewBox="0 0 ${totalW} ${chartH+20}" style="overflow:visible">${bars}</svg>
-    </div>
-    <div class="card">
-      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--muted)">🔥 CONTATOS URGENTES</div>
-      ${urgHTML}
-      ${urgentes.length>5?'<div style="font-size:11px;color:var(--muted);text-align:center;padding-top:6px">+'${urgentes.length-5} mais no CRM</div>':''}
-    </div>
-  </div>
-
-  <div class="card" style="margin-bottom:20px">
-    <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--muted)">⚡ AÇÕES RÁPIDAS</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn" onclick="gotoPage('proposta')" style="flex:1;min-width:120px">✍️ Nova Proposta</button>
-      <button class="btn" onclick="gotoPage('crm')" style="flex:1;min-width:120px">👥 Ver CRM</button>
-      <button class="btn" onclick="gotoPage('catalogo')" style="flex:1;min-width:120px">📦 Catálogo</button>
-      <button class="btn" onclick="gotoPage('trinta')" style="flex:1;min-width:120px">📋 30 Dias</button>
-    </div>
-  </div>
-
-  ${props.length>0?`<div class="card">
-    <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted)">📝 ÚLTIMAS PROPOSTAS</div>
-    ${props.slice(-5).reverse().map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
-      <div>
-        <div style="font-size:13px;font-weight:600">${escHtml(p.nome||p.name||'—')}</div>
-        <div style="font-size:11px;color:var(--muted)">${p.data?new Date(p.data).toLocaleDateString('pt-BR'):''}</div>
-      </div>
-      <span style="font-size:11px;padding:3px 8px;border-radius:20px;background:${(p.status||'').toLowerCase()==='fechado'?'#1B5E20':(p.status||'').toLowerCase()==='aberto'?'#0D47A1':'#37474F'};color:#fff">${escHtml(p.status||'—')}</span>
-    </div>`).join('')}
-  </div>`:''}
-</div>`;
+  document.getElementById('page-dashboard').innerHTML=
+    '<div style="max-width:700px;margin:0 auto;padding:0 4px">'+
+    '<div style="margin-bottom:20px"><h2 style="margin:0 0 2px;font-size:22px">'+saudacao+'</h2>'+
+    '<p style="margin:0;color:var(--muted);font-size:13px">'+datStr+'</p></div>'+
+    '<div class="grid4" style="margin-bottom:20px">'+
+    '<div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:28px;font-weight:700;color:#D14203">'+propHoje+'</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Propostas Hoje</div></div>'+
+    '<div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:28px;font-weight:700;color:#4FC3F7">'+propAberto+'</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Em Aberto</div></div>'+
+    '<div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:28px;font-weight:700;color:#66BB6A">'+propFechado+'</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Fechados</div></div>'+
+    '<div class="card" style="text-align:center;padding:14px 8px"><div style="font-size:28px;font-weight:700;color:#E53935">'+urgentes.length+'</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Urgentes</div></div>'+
+    '</div>'+
+    '<div class="grid2" style="margin-bottom:20px">'+
+    '<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--muted)">📊 PROPOSTAS — ÚLTIMOS 7 DIAS</div>'+
+    '<svg width="100%" viewBox="0 0 '+totalW+' '+(chartH+20)+'" style="overflow:visible">'+bars+'</svg></div>'+
+    '<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--muted)">🔥 CONTATOS URGENTES</div>'+urgHTML+'</div>'+
+    '</div>'+
+    '<div class="card" style="margin-bottom:20px"><div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--muted)">⚡ AÇÕES RÁPIDAS</div>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
+    '<button class="btn" onclick="gotoPage('proposta')" style="flex:1;min-width:120px">✍️ Nova Proposta</button>'+
+    '<button class="btn" onclick="gotoPage('crm')" style="flex:1;min-width:120px">👥 Ver CRM</button>'+
+    '<button class="btn" onclick="gotoPage('catalogo')" style="flex:1;min-width:120px">📦 Catálogo</button>'+
+    '<button class="btn" onclick="gotoPage('trinta')" style="flex:1;min-width:120px">📋 30 Dias</button>'+
+    '</div></div>'+
+    lastProps+
+    '</div>';
 }
 
 
 function renderCRM() {
-  const contacts = JSON.parse(localStorage.getItem('cv_contacts') || '[]');
-  const now = Date.now();
+  var contacts = JSON.parse(localStorage.getItem('cv_contacts') || '[]');
+  var now = Date.now();
 
-  function urgencyDot(c) {
-    if (!c.atualizado_em) return {dot:'#E53935', days:999};
-    const diff = (now - new Date(c.atualizado_em).getTime()) / 86400000;
-    if (diff < 1) return {dot:'#66BB6A', days:diff};
-    if (diff < 3) return {dot:'#FDD835', days:diff};
-    return {dot:'#E53935', days:diff};
+  function urgDot(c){
+    if(!c.atualizado_em) return {dot:'#E53935',days:999};
+    var diff=(now-new Date(c.atualizado_em).getTime())/86400000;
+    if(diff<1) return {dot:'#66BB6A',days:diff};
+    if(diff<3) return {dot:'#FDD835',days:diff};
+    return {dot:'#E53935',days:diff};
   }
 
-  // Sort by urgency (most overdue first)
-  const sorted = [...contacts].sort((a,b) => {
-    const da = a.atualizado_em ? new Date(a.atualizado_em).getTime() : 0;
-    const db = b.atualizado_em ? new Date(b.atualizado_em).getTime() : 0;
-    return da - db;
+  var sorted=contacts.slice().sort(function(a,b){
+    var da=a.atualizado_em?new Date(a.atualizado_em).getTime():0;
+    var db=b.atualizado_em?new Date(b.atualizado_em).getTime():0;
+    return da-db;
   });
 
-  function renderList(list) {
-    if (!list.length) return '<p style="color:var(--muted);text-align:center;padding:20px 0">Nenhum contato encontrado.</p>';
-    return list.map(c => {
-      const {dot, days} = urgencyDot(c);
-      const diasStr = days === 999 ? 'nunca atualizado' : days < 1 ? 'hoje' : days < 2 ? '1 dia' : Math.floor(days)+' dias';
-      const proxStr = c.prox ? ' · próximo: ' + new Date(c.prox).toLocaleDateString('pt-BR') : '';
-      return `<div class="card" style="margin-bottom:10px;cursor:pointer" onclick="editContact('${c.id}')">
-  <div style="display:flex;align-items:flex-start;gap:12px">
-    <span style="margin-top:4px;width:12px;height:12px;border-radius:50%;background:${dot};flex-shrink:0;box-shadow:0 0 6px ${dot}55"></span>
-    <div style="flex:1;min-width:0">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
-        <div style="font-weight:700;font-size:15px">${escHtml(c.empresa||'—')}</div>
-        <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--muted)">${escHtml(c.status||'—')}</span>
-      </div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">${escHtml(c.contato||'')} · ${escHtml(c.seg||'')} · ${escHtml(c.interesse||'')}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">⏱ ${diasStr}${proxStr}</div>
-    </div>
-    ${c.wa?`<a href="https://wa.me/${c.wa.replace(/\D/g,'')}" target="_blank" onclick="event.stopPropagation()" style="color:#25D366;font-size:20px;text-decoration:none;align-self:center">📱</a>`:''}
-  </div>
-</div>`;
-    }).join('');
+  function buildList(list){
+    if(!list.length) return '<p style="color:var(--muted);text-align:center;padding:20px 0">Nenhum contato encontrado.</p>';
+    var html='';
+    for(var i=0;i<list.length;i++){
+      var c=list[i];
+      var ud=urgDot(c);
+      var diff=ud.days;
+      var diasStr=diff===999?'nunca atualizado':diff<1?'hoje':diff<2?'1 dia':Math.floor(diff)+' dias';
+      var proxStr=c.prox?' · próximo: '+new Date(c.prox).toLocaleDateString('pt-BR'):'';
+      var waLink=c.wa?'<a href="https://wa.me/'+c.wa.replace(/\D/g,'')+'" target="_blank" onclick="event.stopPropagation()" style="color:#25D366;font-size:20px;text-decoration:none;align-self:center">📱</a>':'';
+      html+='<div class="card" style="margin-bottom:10px;cursor:pointer" onclick="editContact(''+c.id+'')">';
+      html+='<div style="display:flex;align-items:flex-start;gap:12px">';
+      html+='<span style="margin-top:4px;width:12px;height:12px;border-radius:50%;background:'+ud.dot+';flex-shrink:0;box-shadow:0 0 6px '+ud.dot+'55"></span>';
+      html+='<div style="flex:1;min-width:0">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">';
+      html+='<div style="font-weight:700;font-size:15px">'+escHtml(c.empresa||'—')+'</div>';
+      html+='<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--muted)">'+escHtml(c.status||'—')+'</span></div>';
+      html+='<div style="font-size:12px;color:var(--muted);margin-top:3px">'+escHtml(c.contato||'')+' · '+escHtml(c.seg||'')+' · '+escHtml(c.interesse||'')+'</div>';
+      html+='<div style="font-size:11px;color:var(--muted);margin-top:4px">⏱ '+diasStr+proxStr+'</div>';
+      html+='</div>'+waLink+'</div></div>';
+    }
+    return html;
   }
 
-  document.getElementById('page-crm').innerHTML = `
-<div style="max-width:700px;margin:0 auto;padding:0 4px">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-    <h2 style="margin:0;font-size:20px">👥 CRM — Contatos (${contacts.length})</h2>
-    <button class="btn" onclick="editContact(null)" style="padding:8px 16px">+ Novo Contato</button>
-  </div>
-  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-    <input id="crmSearch" type="text" placeholder="🔍 Buscar empresa, contato..." 
-      style="flex:1;min-width:180px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px"
-      oninput="filterCRM()">
-    <select id="crmFilter" onchange="filterCRM()"
-      style="padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px">
-      <option value="">Todos status</option>
-      <option value="lead">Lead</option>
-      <option value="ativo">Ativo</option>
-      <option value="proposta">Proposta</option>
-      <option value="fechado">Fechado</option>
-      <option value="inativo">Inativo</option>
-    </select>
-  </div>
-  <div id="crmList">${renderList(sorted)}</div>
-</div>`;
+  document.getElementById('page-crm').innerHTML=
+    '<div style="max-width:700px;margin:0 auto;padding:0 4px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">'+
+    '<h2 style="margin:0;font-size:20px">👥 CRM — Contatos ('+contacts.length+')</h2>'+
+    '<button class="btn" onclick="editContact(null)" style="padding:8px 16px">+ Novo Contato</button></div>'+
+    '<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">'+
+    '<input id="crmSearch" type="text" placeholder="🔍 Buscar empresa, contato..." '+
+    'style="flex:1;min-width:180px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px" oninput="filterCRM()">'+
+    '<select id="crmFilter" onchange="filterCRM()" '+
+    'style="padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px">'+
+    '<option value="">Todos status</option><option value="lead">Lead</option><option value="ativo">Ativo</option>'+
+    '<option value="proposta">Proposta</option><option value="fechado">Fechado</option><option value="inativo">Inativo</option></select></div>'+
+    '<div id="crmList">'+buildList(sorted)+'</div></div>';
 
-  // Attach filter function
-  window.filterCRM = function() {
-    const q = (document.getElementById('crmSearch')?.value||'').toLowerCase();
-    const f = (document.getElementById('crmFilter')?.value||'').toLowerCase();
-    const filtered = sorted.filter(c => {
-      const matchQ = !q || (c.empresa||'').toLowerCase().includes(q) || (c.contato||'').toLowerCase().includes(q) || (c.interesse||'').toLowerCase().includes(q);
-      const matchF = !f || (c.status||'').toLowerCase().includes(f);
-      return matchQ && matchF;
+  window.filterCRM=function(){
+    var q=(document.getElementById('crmSearch')&&document.getElementById('crmSearch').value||'').toLowerCase();
+    var f=(document.getElementById('crmFilter')&&document.getElementById('crmFilter').value||'').toLowerCase();
+    var filtered=sorted.filter(function(c){
+      var mq=!q||(c.empresa||'').toLowerCase().includes(q)||(c.contato||'').toLowerCase().includes(q)||(c.interesse||'').toLowerCase().includes(q);
+      var mf=!f||(c.status||'').toLowerCase().includes(f);
+      return mq&&mf;
     });
-    document.getElementById('crmList').innerHTML = renderList(filtered);
+    document.getElementById('crmList').innerHTML=buildList(filtered);
   };
 }
 
@@ -1574,6 +1547,30 @@ function toast(msg,type,dur){
     const encoded = encodeURIComponent(txt);
     const url = waNum ? 'https://wa.me/' + waNum.replace(/\D/g,'') + '?text=' + encoded : 'https://wa.me/?text=' + encoded;
     window.open(url, '_blank');
+  }
+
+
+  function copiarMsg() {
+    var el=document.getElementById('msgPreview');
+    if(!el) return;
+    var txt=el.innerText||el.textContent||'';
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(txt).then(function(){toast('Mensagem copiada!');}).catch(function(){
+        var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Mensagem copiada!');
+      });
+    } else {
+      var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Mensagem copiada!');
+    }
+  }
+  function abrirWhatsApp() {
+    var el=document.getElementById('msgPreview');
+    if(!el){toast('Gere a mensagem primeiro!');return;}
+    var txt=el.innerText||el.textContent||'';
+    if(!txt.trim()||txt.includes('Preencha')||txt.includes('selecione')){toast('Gere a mensagem primeiro!');return;}
+    var waNum=localStorage.getItem('cv_alan_wa')||'';
+    var encoded=encodeURIComponent(txt);
+    var url=waNum?'https://wa.me/'+waNum.replace(/\D/g,'')+' ?text='+encoded:'https://wa.me/?text='+encoded;
+    window.open(url,'_blank');
   }
 
 </script>

@@ -1505,7 +1505,6 @@ function toast(msg,type,dur){
 // ====================== INIT ======================
 (function(){
   loadPrecos();
-  saveCart();
   contadorPropostas=JSON.parse(localStorage.getItem('cv_hist')||'[]').length;
   localStorage.setItem('cv_props',contadorPropostas);
   document.getElementById('ds-crm').textContent=contacts.length;

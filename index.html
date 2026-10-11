@@ -2769,6 +2769,16 @@ async function exportPDF(){
   var btn=$("btnExportPdf"); btn.disabled=true;
   try{
     if(document.fonts&&document.fonts.ready) await document.fonts.ready;
+    setStatus("Preparando o gerador de PDF…","",true);
+    var wu=stage();
+    wu.style.background="#1a1a2e";
+    wu.innerHTML='<div style="position:absolute;font-family:Montserrat,sans-serif;font-size:28px;font-weight:700;color:#fff;">Brinde</div>'
+      +'<div style="position:absolute;top:60px;font-family:Montserrat,sans-serif;font-size:13.5px;font-weight:400;color:#cfcfcf;">Produto</div>'
+      +'<div style="position:absolute;top:90px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#d14203;">TAG</div>'
+      +'<div style="position:absolute;top:120px;font-family:Montserrat,sans-serif;font-size:16px;font-weight:600;color:#fff;">Kit Executivo</div>'
+      +'<div style="position:absolute;top:150px;font-family:Montserrat,sans-serif;font-size:10px;font-weight:400;color:#aaa;">descrição do produto</div>';
+    await html2canvas(wu,{width:PDF_W,height:PDF_H,scale:1,backgroundColor:"#1a1a2e",useCORS:true,logging:false});
+    if(pdfStage){pdfStage.remove();pdfStage=null;}
     var slides=buildSlides(S);
     var doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"in",format:[W,H],compress:true});
     for(var i=0;i<slides.length;i++){

@@ -5,7 +5,7 @@
 <!-- v3 --><title>Central de Vendas · ArznStoreSP</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -42,6 +42,38 @@ html,body{height:100%;font-family:Montserrat,system-ui,sans-serif;background:var
 button,input,select,textarea{font:inherit;color:inherit}
 img{display:block}
 a{color:var(--orange);text-decoration:none}
+
+/* ===================== AUTH OVERLAY ===================== */
+#authOverlay{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+}
+#authOverlay[hidden]{display:none!important}
+.auth-box{
+  width:100%;max-width:380px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:16px;
+  padding:36px 32px;
+}
+.auth-logo{font-size:22px;font-weight:900;letter-spacing:-.03em;margin-bottom:4px}
+.auth-logo span{color:var(--orange)}
+.auth-sub{font-size:12px;color:var(--muted);margin-bottom:28px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.auth-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.auth-field label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.auth-field input{height:44px;font-size:14px}
+#authError{
+  display:none;
+  background:var(--err-lo);border:1px solid var(--err);
+  color:var(--err);border-radius:8px;
+  padding:10px 14px;font-size:13px;margin-bottom:14px;
+}
+#authError.show{display:block}
+#authSubmit{width:100%;height:44px;font-size:15px;font-weight:700;margin-top:4px}
+.auth-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* ===================== APP LAYOUT ===================== */
 .app{display:flex;min-height:100vh}
@@ -450,6 +482,27 @@ input:hover,textarea:hover{border-color:var(--line-2)}
 <div class="app">
 
 <!-- ===================== SIDEBAR ===================== -->
+<!-- ===================== AUTH OVERLAY ===================== -->
+<div id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">Arzn<span>Store</span>SP</div>
+    <div class="auth-sub">Central de Vendas · Acesso</div>
+    <div id="authError"></div>
+    <div class="auth-field">
+      <label for="authEmail">E-mail</label>
+      <input id="authEmail" type="email" placeholder="seu@email.com" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('authPwd').focus()">
+    </div>
+    <div class="auth-field">
+      <label for="authPwd">Senha</label>
+      <input id="authPwd" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')authLogin()">
+    </div>
+    <button id="authSubmit" class="btn btn-primary" onclick="authLogin()">Entrar</button>
+    <div style="margin-top:18px;font-size:11px;color:var(--dim);text-align:center">
+      Acesso restrito · ArznStoreSP © 2026
+    </div>
+  </div>
+</div>
+
 <aside class="sidebar">
   <div class="logo">Arzn<span>Store</span>SP<div class="logo-sub">Central de Vendas</div></div>
   <nav class="nav">
@@ -460,11 +513,18 @@ input:hover,textarea:hover{border-color:var(--line-2)}
     <button class="nav-btn" onclick="gotoPage('trinta',this)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar-days" aria-hidden="true" class="lucide lucide-calendar-days"><path d="M8 2v3"></path><path d="M16 2v3"></path><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path><path d="M8 13h.01"></path><path d="M12 13h.01"></path><path d="M16 13h.01"></path><path d="M8 17h.01"></path><path d="M12 17h.01"></path><path d="M16 17h.01"></path></svg>30 Dias</button>
     <button class="nav-btn" onclick="gotoPage('crm',this)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="users" aria-hidden="true" class="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><path d="M16 3.128a4 4 0 0 1 0 7.744"></path><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><circle cx="9" cy="7" r="4"></circle></svg>CRM<span class="badge" id="crmBadge">0</span></button>
     <button class="nav-btn" onclick="gotoPage('textos',this)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="message-square" aria-hidden="true" class="lucide lucide-message-square"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"></path></svg>Textos</button>
-    <button class="nav-btn" onclick="gotoPage('admin',this)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="lock" aria-hidden="true" class="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Admin</button>
+    <button class="nav-btn" data-page="admin" onclick="gotoPage('admin',this)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="lock" aria-hidden="true" class="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Admin</button>
   </nav>
   <div class="sidebar-footer">
+    <div id="authUserInfo" style="margin-bottom:6px;display:none">
+      <div id="authUserEmail" style="font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+      <div id="authUserRole" style="font-size:10px;color:var(--orange);font-weight:700;margin-bottom:4px"></div>
+      <button onclick="authLogout()" style="display:flex;align-items:center;gap:5px;background:transparent;border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-size:11px;padding:4px 8px;cursor:pointer;font-family:inherit;width:100%;margin-bottom:6px" onmouseover="this.style.color='var(--err)'" onmouseout="this.style.color='var(--muted)'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>Sair
+      </button>
+    </div>
     ArznStoreSP © 2026
-    <div id="syncStatus" style="margin-top:4px;font-size:10px;opacity:.7">🟢 Sincronizado</div>
+    <div id="syncStatus" style="margin-top:4px;font-size:10px;opacity:.7">⚫ Local</div>
   </div>
 </aside>
 
@@ -1141,32 +1201,158 @@ var PLANO_30 = [];
 function loadDayStatus(n){ return localStorage.getItem('cv_day_'+n)||'pendente'; }
 function saveDayStatus(n,s){
   localStorage.setItem('cv_day_'+n,s);
-  if(sb) sb.from('progresso_dias').upsert({dia:n,status:s,atualizado_em:new Date().toISOString()},{onConflict:'dia'}).then(function(r){ if(r.error) console.warn('Supabase day err',r.error); });
+  if(sb && AUTH_USER) sb.from('progresso_dias').upsert({dia:n,status:s,atualizado_em:new Date().toISOString()},{onConflict:'dia'}).then(function(r){ if(r.error) console.warn('Supabase day err',r.error); });
 }
 
-// ====================== SUPABASE ======================
+// ====================== SUPABASE + AUTH ======================
 var SUPA_URL='https://edztcoebgllqrkrkormc.supabase.co';
 var SUPA_KEY='sb_publishable_s6MSdF0rhidpCpddqTzNRg_1ajwnxIc';
 var sb=null;
 var _synced=false;
 
-function initSupabase(){
+// Auth state
+var AUTH_USER=null;   // supabase user object
+var AUTH_ROLE=null;   // 'admin' | 'vendedor' | null
+var AUTH_VENDOR_ID=null; // user.id when role=vendedor
+
+// ---- Login screen ----
+function authShowError(msg){
+  var el=document.getElementById('authError');
+  if(!el) return;
+  el.textContent=msg;
+  el.classList.add('show');
+}
+function authClearError(){
+  var el=document.getElementById('authError');
+  if(el){ el.textContent=''; el.classList.remove('show'); }
+}
+function authSetLoading(loading){
+  var btn=document.getElementById('authSubmit');
+  if(!btn) return;
+  if(loading){
+    btn.innerHTML='<span class="auth-spinner"></span>Entrando…';
+    btn.disabled=true;
+  } else {
+    btn.innerHTML='Entrar';
+    btn.disabled=false;
+  }
+}
+async function authLogin(){
+  if(!sb){ authShowError('Serviço indisponível. Recarregue a página.'); return; }
+  var email=(document.getElementById('authEmail').value||'').trim();
+  var pwd=document.getElementById('authPwd').value||'';
+  if(!email || !pwd){ authShowError('Informe e-mail e senha.'); return; }
+  authClearError();
+  authSetLoading(true);
   try{
-    sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+    var r=await sb.auth.signInWithPassword({email:email,password:pwd});
+    if(r.error){ authShowError(authFriendlyError(r.error)); authSetLoading(false); return; }
+    // onAuthStateChange will handle the rest
+  }catch(e){ authShowError('Erro inesperado. Tente novamente.'); authSetLoading(false); }
+}
+function authFriendlyError(err){
+  var msg=(err&&err.message)||'';
+  if(msg.includes('Invalid login')||msg.includes('invalid_credentials')) return 'E-mail ou senha incorretos.';
+  if(msg.includes('Email not confirmed')) return 'Confirme seu e-mail antes de entrar.';
+  if(msg.includes('Too many requests')) return 'Muitas tentativas. Aguarde alguns minutos.';
+  return msg||'Erro ao entrar. Tente novamente.';
+}
+async function authLogout(){
+  if(!sb) return;
+  await sb.auth.signOut();
+  // onAuthStateChange handles clearing state
+}
+async function _fetchRole(userId){
+  if(!sb||!userId) return null;
+  try{
+    var r=await sb.from('user_roles').select('role').eq('user_id',userId).maybeSingle();
+    return (r.data&&r.data.role)||null;
+  }catch(e){ return null; }
+}
+function _applyAuthState(user, role){
+  AUTH_USER=user;
+  AUTH_ROLE=role;
+  AUTH_VENDOR_ID=(role==='vendedor'&&user)?user.id:null;
+  var overlay=document.getElementById('authOverlay');
+  var userInfo=document.getElementById('authUserInfo');
+  var emailEl=document.getElementById('authUserEmail');
+  var roleEl=document.getElementById('authUserRole');
+  if(user && role){
+    // Hide login, show app
+    if(overlay) overlay.hidden=true;
+    if(userInfo) userInfo.style.display='block';
+    if(emailEl) emailEl.textContent=user.email||'';
+    if(roleEl) roleEl.textContent=role==='admin'?'🔑 Admin':'👤 Vendedor';
+    authSetLoading(false);
+    // Gate admin nav button — add data-page="admin" to identify it
+    var adminBtn=document.querySelector('.nav-btn[data-page="admin"]');
+    if(adminBtn) adminBtn.style.display=(role==='admin'?'':'none');
     setSyncStatus('syncing');
     loadFromSupabase();
     subscribeRealtime();
+  } else {
+    // Show login screen
+    if(overlay) overlay.hidden=false;
+    if(userInfo) userInfo.style.display='none';
+    if(emailEl) emailEl.textContent='';
+    if(roleEl) roleEl.textContent='';
+    authSetLoading(false);
+    setSyncStatus('off');
+    // Unsubscribe realtime
+    if(sb) sb.channel('cv-changes').unsubscribe().catch(function(){});
+  }
+}
+
+function initSupabase(){
+  try{
+    sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+    // Listen to auth state changes
+    sb.auth.onAuthStateChange(async function(event, session){
+      if(session && session.user){
+        var role=await _fetchRole(session.user.id);
+        if(!role){
+          // User exists in auth but has no role — deny access
+          await sb.auth.signOut();
+          _applyAuthState(null,null);
+          authShowError('Seu usuário não tem perfil configurado. Fale com o administrador.');
+          return;
+        }
+        _applyAuthState(session.user, role);
+      } else {
+        _applyAuthState(null, null);
+      }
+    });
+    // Check existing session on load
+    sb.auth.getSession().then(async function(res){
+      var session=res&&res.data&&res.data.session;
+      if(session && session.user){
+        var role=await _fetchRole(session.user.id);
+        if(role){
+          _applyAuthState(session.user, role);
+        } else {
+          // No role found — show login
+          await sb.auth.signOut();
+          _applyAuthState(null, null);
+        }
+      } else {
+        // No session — show login
+        _applyAuthState(null, null);
+      }
+    });
   }catch(e){ console.warn('Supabase init failed',e); setSyncStatus('off'); }
 }
 
 async function loadFromSupabase(){
-  if(!sb) return;
+  if(!sb || !AUTH_USER) return;
   try{
-    var r1=await sb.from('contatos').select('*').order('criado_em',{ascending:true});
+    // Vendedor sees only their own contacts; admin sees all
+    var q1=sb.from('contatos').select('*').order('criado_em',{ascending:true});
+    if(AUTH_ROLE==='vendedor' && AUTH_VENDOR_ID) q1=q1.eq('vendor_id',AUTH_VENDOR_ID);
+    var r1=await q1;
     if(!r1.error && r1.data){
       contacts=r1.data.map(function(r){
         var ex={};try{ex=JSON.parse(r.notas||'{}')}catch(e){}
-        return{id:r.id,empresa:r.empresa||'',contato:r.contato||'',wa:r.whatsapp||'',seg:r.segmento||'',interesse:r.interesse||'',status:r.status||'Novo',prox:ex.prox||'',obs:ex.obs||r.notas||''};
+        return{id:r.id,empresa:r.empresa||'',contato:r.contato||'',wa:r.whatsapp||'',seg:r.segmento||'',interesse:r.interesse||'',status:r.status||'Novo',prox:ex.prox||'',obs:ex.obs||r.notas||'',vendor_id:r.vendor_id||''};
       });
       localStorage.setItem('cv_contacts',JSON.stringify(contacts));
       if(window.renderCRM) renderCRM();
@@ -1189,7 +1375,7 @@ async function loadFromSupabase(){
 }
 
 function subscribeRealtime(){
-  if(!sb) return;
+  if(!sb || !AUTH_USER) return;
   sb.channel('cv-changes')
     .on('postgres_changes',{event:'*',schema:'public',table:'contatos'},function(){ loadFromSupabase(); })
     .on('postgres_changes',{event:'*',schema:'public',table:'progresso_dias'},function(){ loadFromSupabase(); })
@@ -1203,7 +1389,7 @@ function setSyncStatus(state){
 }
 
 async function syncXbzPrices(showToast){
-  if(!sb){ if(showToast) toast('Supabase offline','err'); return; }
+  if(!sb || !AUTH_USER){ if(showToast) toast('Faça login para sincronizar preços','err'); return; }
   try{
     var r=await sb.from('precos_xbz').select('codigo_xbz,preco,disponivel').eq('disponivel','SIM');
     if(r.error){ if(showToast) toast('Erro ao buscar preços XBZ','err'); return; }
@@ -1245,6 +1431,8 @@ var contadorPropostas = parseInt(localStorage.getItem('cv_props')||'0');
 
 // ====================== NAV ======================
 function gotoPage(id, btn){
+  // Block admin page for non-admins
+  if(id==='admin' && AUTH_ROLE && AUTH_ROLE!=='admin'){ toast('Acesso restrito a administradores.','err'); return; }
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
   document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')});
   document.getElementById('page-'+id).classList.add('active');
@@ -1461,9 +1649,11 @@ async function saveContact(){
   var localId=document.getElementById('cr-id').value;
   var obj={cnpj:(document.getElementById('cr-cnpj').value||'').replace(/\D/g,''),empresa:empresa,contato:document.getElementById('cr-contato').value.trim(),email:(document.getElementById('cr-email')?document.getElementById('cr-email').value.trim():''),wa:document.getElementById('cr-wa').value.trim(),seg:document.getElementById('cr-seg').value,interesse:document.getElementById('cr-interesse').value.trim(),status:document.getElementById('cr-status').value,prox:document.getElementById('cr-prox').value.trim(),obs:document.getElementById('cr-obs').value.trim()};
   var idx=localId?contacts.findIndex(function(c){return c.id===localId}):-1;
-  if(sb){
+  if(sb && AUTH_USER){
     setSyncStatus('syncing');
     var row={empresa:obj.empresa,contato:obj.contato,whatsapp:obj.wa,segmento:obj.seg,interesse:obj.interesse,status:obj.status,notas:JSON.stringify({obs:obj.obs,prox:obj.prox}),atualizado_em:new Date().toISOString()};
+    // Set vendor_id on new records; preserve on updates
+    if(!localId || idx<0) row.vendor_id=AUTH_USER.id;
     var r;
     if(localId && idx>=0){ row.id=localId; r=await sb.from('contatos').upsert(row,{onConflict:'id'}); }
     else { r=await sb.from('contatos').insert(row).select('id').single(); }
@@ -1483,8 +1673,9 @@ async function saveContact(){
   toast(idx>=0?'Contato atualizado':'Contato salvo ✓','ok');
 }
 async function deleteContact(id){
+  if(AUTH_ROLE && AUTH_ROLE!=='admin'){ toast('Apenas administradores podem excluir contatos.','err'); return; }
   if(!confirm('Excluir este contato?')) return;
-  if(sb){
+  if(sb && AUTH_USER){
     setSyncStatus('syncing');
     var r=await sb.from('contatos').delete().eq('id',id);
     if(r.error){ console.warn('Supabase delete err',r.error); setSyncStatus('err'); }
@@ -1525,25 +1716,43 @@ function saveVendedora(){
 }
 
 // ====================== ADMIN ======================
+// Gera hash SHA-256 hexadecimal (async, retorna Promise<string>)
+function _hashPwd(s){
+  return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s))
+    .then(function(buf){ return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join(''); });
+}
+// Verifica se o valor salvo está em texto puro (legado, <64 chars ou não-hex) e migra
+function _migrateLegacyPwd(raw){
+  if(!raw) return Promise.resolve(null);
+  // Hash SHA-256 tem exatamente 64 chars hex; qualquer outra coisa é legado
+  if(raw.length===64 && /^[0-9a-f]+$/.test(raw)) return Promise.resolve(raw); // já hash
+  return _hashPwd(raw).then(function(h){ localStorage.setItem('cv_admin_pwd',h); return h; });
+}
 function checkAdmin(){
   var pwd=document.getElementById('adminPwd').value;
   var saved=localStorage.getItem('cv_admin_pwd');
   if(!saved){
     // Primeiro acesso: forçar configuração de senha
     if(pwd.length<6){ toast('Defina uma senha com pelo menos 6 caracteres.','err'); return; }
-    localStorage.setItem('cv_admin_pwd',pwd);
-    adminUnlocked=true;
-    document.getElementById('adminLock').hidden=true;
-    document.getElementById('adminArea').hidden=false;
-    loadAdminArea();
-    toast('Senha criada com sucesso!','ok');
-  } else {
-    if(pwd===saved){
+    _hashPwd(pwd).then(function(h){
+      localStorage.setItem('cv_admin_pwd',h);
       adminUnlocked=true;
       document.getElementById('adminLock').hidden=true;
       document.getElementById('adminArea').hidden=false;
       loadAdminArea();
-    } else { toast('Senha incorreta','err'); }
+      toast('Senha criada com sucesso!','ok');
+    });
+  } else {
+    _migrateLegacyPwd(saved).then(function(savedHash){
+      return _hashPwd(pwd).then(function(pwdHash){ return [savedHash, pwdHash]; });
+    }).then(function(pair){
+      if(pair[0]===pair[1]){
+        adminUnlocked=true;
+        document.getElementById('adminLock').hidden=true;
+        document.getElementById('adminArea').hidden=false;
+        loadAdminArea();
+      } else { toast('Senha incorreta','err'); }
+    });
   }
 }
 function lockAdmin(){
@@ -1677,14 +1886,19 @@ function saveAdminConfig(){
   var sp=document.getElementById('adminSenha').value;
   localStorage.setItem('cv_vendedora_nome',fn);
   localStorage.setItem('cv_alan_wa',aw);
-  if(sp) localStorage.setItem('cv_admin_pwd',sp);
-  toast('Configurações salvas ✓','ok');
+  if(sp){
+    if(sp.length<6){ toast('Nova senha deve ter pelo menos 6 caracteres.','err'); return; }
+    _hashPwd(sp).then(function(h){ localStorage.setItem('cv_admin_pwd',h); toast('Configurações salvas ✓','ok'); });
+  } else {
+    toast('Configurações salvas ✓','ok');
+  }
 }
 
 // ====================== BACKUP ======================
 var _backupPendente=null;
 function exportarBackup(){
-  var keys=Object.keys(localStorage).filter(function(k){ return k.startsWith('cv_'); });
+  // cv_admin_pwd é excluído do backup por segurança (hash, mas não deve ser portado)
+  var keys=Object.keys(localStorage).filter(function(k){ return k.startsWith('cv_') && k!=='cv_admin_pwd'; });
   var data={};
   keys.forEach(function(k){ data[k]=localStorage.getItem(k); });
   data._exportedAt=new Date().toISOString();
@@ -1729,10 +1943,10 @@ function confirmarRestore(){
   if(!_backupPendente){ document.getElementById('modalBackup').hidden=true; return; }
   var data=_backupPendente;
   _backupPendente=null;
-  // Remover chaves cv_ atuais
-  Object.keys(localStorage).filter(function(k){ return k.startsWith('cv_'); }).forEach(function(k){ localStorage.removeItem(k); });
-  // Restaurar do backup
-  Object.keys(data).filter(function(k){ return k.startsWith('cv_'); }).forEach(function(k){ localStorage.setItem(k,data[k]); });
+  // Remover chaves cv_ atuais (exceto a senha do admin, que não é portável)
+  Object.keys(localStorage).filter(function(k){ return k.startsWith('cv_') && k!=='cv_admin_pwd'; }).forEach(function(k){ localStorage.removeItem(k); });
+  // Restaurar do backup (nunca restaura cv_admin_pwd)
+  Object.keys(data).filter(function(k){ return k.startsWith('cv_') && k!=='cv_admin_pwd'; }).forEach(function(k){ localStorage.setItem(k,data[k]); });
   document.getElementById('modalBackup').hidden=true;
   toast('Backup restaurado! Recarregando…','ok');
   setTimeout(function(){ location.reload(); },1500);
@@ -1845,14 +2059,23 @@ function renderCatalog(){
   PRODUTOS.forEach(function(p){ if(p.visivelVendedor!==false && cats.indexOf(p.cat)===-1) cats.push(p.cat); });
   cats.sort();
 
-  // Render filter chips
+  // Render filter chips (data-cat attribute — no inline JS execution)
   if(chipsEl){
-    chipsEl.innerHTML=['<button class="chip'+(filterActive===''?' active':'')+'" onclick="filterActive=\'\';renderCatalog()" style="cursor:pointer">Todos</button>']
+    chipsEl.innerHTML=['<button class="chip'+(filterActive===''?' active':'')+'" data-cat="" style="cursor:pointer">Todos</button>']
       .concat(cats.map(function(c){
         var icon=CAT_IC[c]||'tag';
-        return '<button class="chip'+(filterActive===c?' active':'')+'" onclick="filterActive=\''+esc(c)+'\';renderCatalog()" style="cursor:pointer">'
+        return '<button class="chip'+(filterActive===c?' active':'')+'" data-cat="'+esc(c)+'" style="cursor:pointer">'
           +'<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'13\' height=\'13\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><use href=\'#icon-'+icon+'\'/></svg> '+esc(c)+'</button>';
       })).join('');
+    if(!chipsEl._catListener){
+      chipsEl._catListener=true;
+      chipsEl.addEventListener('click',function(e){
+        var btn=e.target.closest('button[data-cat]');
+        if(!btn) return;
+        filterActive=btn.getAttribute('data-cat');
+        renderCatalog();
+      });
+    }
   }
 
   var q=(document.getElementById('searchInput')||{}).value||'';
@@ -1895,7 +2118,7 @@ function renderCatalog(){
 }
 
 // ====================== UTIL ======================
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 function toast(msg,type,dur){
   var el=document.createElement('div');
   el.className='toast'+(type?' '+type:'');
@@ -2437,9 +2660,11 @@ function pad(n){ return String(n).padStart(2,"0"); }
 function byId(id){ return S.products.filter(function(p){return p.id===id;})[0]; }
 var statusTimer;
 function setStatus(msg, kind, keep){
-  var el=$("status"); el.textContent=msg||""; el.className=kind||""; el.title=msg||"";
+  var el=$("status"); if(!el) return;
+  var safeMsg=(msg===undefined||msg===null)?"":(String(msg)||"");
+  el.textContent=safeMsg; el.className=kind||""; el.title=safeMsg;
   clearTimeout(statusTimer);
-  if(msg && !keep) statusTimer=setTimeout(function(){ el.textContent=""; el.className=""; }, 6000);
+  if(safeMsg && !keep) statusTimer=setTimeout(function(){ el.textContent=""; el.className=""; }, 6000);
 }
 var __mctx=null;
 function measureCtx(){
@@ -3122,8 +3347,7 @@ var _btnBlank=$("btnBlank"); if(_btnBlank) _btnBlank.addEventListener("click",fu
   S.products.push(newProduct({open:true})); renderList(); schedule();
   var last=$("list").lastElementChild; if(last){ var inp=last.querySelector(".f-name"); if(inp) inp.focus(); }
 });
-$("btnExport").addEventListener("click",exportPPTX);
-$("btnExportPdf").addEventListener("click",exportPDF);
+/* btnExport e btnExportPdf são bindados apenas dentro de _initCatalog() — sem binding duplicado aqui */
 $("btnReset").addEventListener("click",function(){
   if(!S.products.length && !S.client.name && !S.client.cnpj) return;
   if(!window.confirm("Limpar cliente e produtos? Os textos de capa, fechamento e contato são mantidos.")) return;
@@ -3236,7 +3460,15 @@ window.confirmarRestore = confirmarRestore;
   if(window.lucide) lucide.createIcons();
   renderDashboard();
   renderHistorico();
-  if(window.supabase) initSupabase(); else setSyncStatus('off');
+  if(window.supabase){
+    initSupabase();
+  } else {
+    setSyncStatus('off');
+    // No Supabase lib — show auth overlay with error message
+    var overlay=document.getElementById('authOverlay');
+    if(overlay) overlay.hidden=false;
+    authShowError('Biblioteca Supabase não carregou. Verifique a conexão e recarregue.');
+  }
   // Show last XBZ sync date
   var lastSync=localStorage.getItem('cv_xbz_sync');
   var lbl=document.getElementById('xbzSyncLabel');

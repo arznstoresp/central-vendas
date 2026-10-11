@@ -72,7 +72,7 @@ a{color:var(--orange);text-decoration:none}
 }
 #authError.show{display:block}
 #authSubmit{width:100%;height:44px;font-size:15px;font-weight:700;margin-top:4px}
-#authSubmit{display:flex!important;align-items:center;justify-content:center;background:#D14203!important;color:#fff!important;border:1px solid #E65B1D!important;border-radius:9px!important;cursor:pointer;box-shadow:0 5px 20px rgba(209,66,3,.22);transition:background .2s,transform .2s}
+#authSubmit{height:42px!important;min-height:42px!important;max-height:42px!important;padding:0 16px!important;line-height:1.2!important;box-sizing:border-box!important;display:flex!important;align-items:center;justify-content:center;background:#D14203!important;color:#fff!important;border:1px solid #E65B1D!important;border-radius:9px!important;cursor:pointer;box-shadow:0 5px 20px rgba(209,66,3,.22);transition:background .2s,transform .2s}
 #authSubmit:hover:not(:disabled){background:#E65B1D!important;transform:translateY(-1px)}
 #authSubmit:focus-visible,.auth-forgot:focus-visible{outline:2px solid #fff;outline-offset:3px}
 #authSubmit:disabled{opacity:.7;cursor:wait}
@@ -1290,7 +1290,7 @@ async function authSaveNewPassword(){
 async function authForgotPassword(){
   if(!sb){authShowError('Serviço indisponível. Recarregue a página.');return;}
   var email=(document.getElementById('authEmail').value||'').trim();
-  if(!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
     authShowError('Informe um e-mail válido no campo acima para recuperar sua senha.');
     document.getElementById('authEmail').focus();
     return;

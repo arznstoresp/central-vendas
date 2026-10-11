@@ -658,9 +658,10 @@ input:hover,textarea:hover{border-color:var(--line-2)}
       <div class="pg-sub">30 produtos disponíveis para personalização</div>
     </div>
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Buscar produto, categoria ou uso..." oninput="renderCatalog()">
+      <input type="text" id="searchInput" placeholder="Buscar nome, modelo ou código SKU..." oninput="renderCatalog()">
       <button class="btn btn-sm" onclick="clearFilters()">Limpar filtros</button>
     </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0"><strong style="font-size:13px">Tipos de produto</strong><span style="font-size:11px;color:var(--muted)">Busque por nome ou SKU para encontrar mais rápido</span></div>
     <div class="filters" id="filterChips"></div>
     <div id="catalogGrid" class="prod-grid"></div>
   </div>
@@ -690,7 +691,8 @@ input:hover,textarea:hover{border-color:var(--line-2)}
         <span id="count" style="font-size:10px;color:var(--dim);margin-right:8px"></span>
         <button class="btn small" id="btnBlank" type="button" style="font-size:10px;padding:3px 8px">+ Em branco</button>
       </div>
-      <div style="font-size:10px;color:var(--dim);margin-bottom:6px">Clique para adicionar ao catálogo:</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Pesquise por nome ou SKU e clique para adicionar:</div>
+      <input id="cat-product-search" type="search" placeholder="Buscar caneta, copo, SKU..." aria-label="Buscar produtos para o catálogo" oninput="buildProductPicker()" style="width:100%;height:38px;padding:8px 10px;background:#0A0D14;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;margin-bottom:8px">
       <div id="cat-prod-chips" style="display:flex;flex-wrap:wrap;gap:4px;max-height:150px;overflow-y:auto;padding-bottom:4px"></div>
       <div id="list" style="margin-top:8px"></div>
     </div>
@@ -872,7 +874,8 @@ input:hover,textarea:hover{border-color:var(--line-2)}
       <div class="pg-sub">Scripts de abordagem para WhatsApp</div>
     </div>
     <div class="card">
-      <div class="card-title">Personalize as mensagens de prospecção</div>\n      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Digite o nome de quem vai enviar as mensagens. O nome aparece automaticamente nos textos abaixo. O WhatsApp do gestor fica salvo como referência; depois é só clicar em Copiar e enviar ao cliente.</p>
+      <div class="card-title">Personalize as mensagens de prospecção</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Digite o nome de quem vai enviar as mensagens. O nome aparece automaticamente nos textos abaixo. O WhatsApp do gestor fica salvo como referência; depois é só clicar em Copiar e enviar ao cliente.</p>
       <div class="row">
         <div class="field" style="flex:1"><label>Nome do vendedor ou vendedora</label><input id="vendedoraNome" placeholder="Ex.: Maria" oninput="saveVendedora()"></div>
         <div class="field" style="flex:1"><label>WhatsApp do gestor (referência)</label><input id="alanWa" placeholder="5511988011285" oninput="saveVendedora()"></div>
@@ -894,7 +897,7 @@ input:hover,textarea:hover{border-color:var(--line-2)}
     <div style="color:var(--muted);font-size:13px;margin-bottom:20px">Acesso restrito — somente Alan</div>
     <div id="adminFirstUseHint" style="display:none;background:var(--warn-lo);border:1px solid var(--warn);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--warn);margin-bottom:12px;text-align:left">⚠ Primeiro acesso: defina sua senha agora (mín. 6 caracteres).</div>
     <div class="field"><label>Senha</label><input type="password" id="adminPwd" placeholder="Digite a senha..." onkeydown="if(event.key==='Enter')checkAdmin()"></div>
-    <button class="btn btn-primary" style="margin-top:12px;width:100%;justify-content:center" onclick="checkAdmin()">Entrar</button>
+    <button class="btn btn-primary" style="margin-top:12px;width:100%;min-height:42px;max-height:42px;padding:0 16px;display:flex;align-items:center;justify-content:center;background:#D14203;color:#fff;border:1px solid #E65B1D;border-radius:9px;font-weight:700;cursor:pointer" onclick="checkAdmin()">Entrar</button>
   </div>
   <div id="adminArea" hidden="">
     <div class="stack">
@@ -2150,25 +2153,35 @@ function renderCatalog(){
   var chipsEl=document.getElementById('filterChips');
   if(!grid) return;
 
-  // Build category list
-  var cats=[];
-  PRODUTOS.forEach(function(p){ if(p.visivelVendedor!==false && cats.indexOf(p.cat)===-1) cats.push(p.cat); });
-  cats.sort();
-
-  // Render filter chips (data-cat attribute — no inline JS execution)
+  // Filter by product model/type, not commercial occasion.
+  function productType(p){
+    var n=(p.nome||"").toLowerCase();
+    var types=[
+      ["Canetas",/caneta|lapiseira|marca.texto/],
+      ["Cadernos e blocos",/caderno|bloco|agenda|planner|post.it/],
+      ["Copos e garrafas",/copo|garrafa|squeeze|térmic|termic|caneca|xícara|xicara/],
+      ["Bolsas e sacolas",/bolsa|sacola|mochila|necessaire|ecobag/],
+      ["Tecnologia",/carregador|power.bank|usb|mouse|fone|suporte de celular|cabo/],
+      ["Vestuário",/camiseta|camisa|boné|bone|uniforme|moletom/],
+      ["Chaveiros",/chaveiro/],
+      ["Kits",/kit |conjunto/]
+    ];
+    for(var i=0;i<types.length;i++)if(types[i][1].test(n))return types[i][0];
+    return "Outros produtos";
+  }
+  var types=[];
+  PRODUTOS.forEach(function(p){if(p.visivelVendedor!==false){var t=productType(p);if(types.indexOf(t)<0)types.push(t);}});
+  types.sort();
   if(chipsEl){
-    chipsEl.innerHTML=['<button class="chip'+(filterActive===''?' active':'')+'" data-cat="" style="cursor:pointer">Todos</button>']
-      .concat(cats.map(function(c){
-        var icon=CAT_IC[c]||'tag';
-        return '<button class="chip'+(filterActive===c?' active':'')+'" data-cat="'+esc(c)+'" style="cursor:pointer">'
-          +'<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'13\' height=\'13\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><use href=\'#icon-'+icon+'\'/></svg> '+esc(c)+'</button>';
-      })).join('');
-    if(!chipsEl._catListener){
-      chipsEl._catListener=true;
+    chipsEl.innerHTML=['<button class="chip'+(filterActive===''?' active':'')+'" data-type="">Todos</button>',
+      '<button class="chip'+(filterActive==='__rapidos__'?' active':'')+'" data-type="__rapidos__">⚡ Venda rápida</button>']
+      .concat(types.map(function(t){return '<button class="chip'+(filterActive===t?' active':'')+'" data-type="'+esc(t)+'">'+esc(t)+'</button>';})).join('');
+    if(!chipsEl._typeListener){
+      chipsEl._typeListener=true;
       chipsEl.addEventListener('click',function(e){
-        var btn=e.target.closest('button[data-cat]');
-        if(!btn) return;
-        filterActive=btn.getAttribute('data-cat');
+        var btn=e.target.closest('button[data-type]');
+        if(!btn)return;
+        filterActive=btn.getAttribute('data-type');
         renderCatalog();
       });
     }
@@ -2179,9 +2192,10 @@ function renderCatalog(){
 
   var visible=PRODUTOS.filter(function(p){
     if(p.visivelVendedor===false) return false;
-    if(filterActive && p.cat!==filterActive) return false;
+    if(filterActive==='__rapidos__' && p.status!=='venda-rapida')return false;
+    if(filterActive && filterActive!=='__rapidos__' && productType(p)!==filterActive)return false;
     if(q){
-      var hay=(p.nome+' '+p.cat+' '+(p.desc||'')+' '+(p.indicado||[]).join(' ')).toLowerCase();
+      var hay=(p.nome+' '+p.sku+' '+(p.codigoXbz||'')+' '+p.cat+' '+(p.desc||'')+' '+(p.indicado||[]).join(' ')).toLowerCase();
       if(hay.indexOf(q)===-1) return false;
     }
     return true;
@@ -2695,7 +2709,15 @@ function buildProductPicker(){
   var container = document.getElementById("cat-prod-chips");
   if(!container) return;
   var allProds = (typeof window.PRODUTOS !== "undefined") ? window.PRODUTOS : [];
+  var query=(document.getElementById("cat-product-search")||{}).value||"";
+  query=query.toLocaleLowerCase("pt-BR").trim();
+  allProds=allProds.filter(function(p){
+    if(p.visivelVendedor===false)return false;
+    if(!query)return true;
+    return ((p.nome||"")+" "+(p.sku||"")+" "+(p.codigoXbz||"")+" "+(p.cat||"")).toLocaleLowerCase("pt-BR").includes(query);
+  }).slice(0,40);
   container.innerHTML = "";
+  if(!allProds.length){container.textContent="Nenhum produto encontrado. Tente outro nome ou SKU.";return;}
   allProds.forEach(function(p){
     var btn = document.createElement("button");
     btn.type = "button";

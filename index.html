@@ -508,6 +508,11 @@ input:hover,textarea:hover{border-color:var(--line-2)}
     </div>
     <button id="authSubmit" class="btn btn-primary" onclick="authLogin()">Entrar</button>
     <button type="button" class="auth-forgot" id="authForgot" onclick="authForgotPassword()">Esqueceu sua senha?</button>
+    <div id="authResetPanel" hidden style="margin-top:16px">
+      <div class="auth-field"><label for="authNewPassword">Nova senha (mínimo 8 caracteres)</label><input id="authNewPassword" type="password" autocomplete="new-password" minlength="8"></div>
+      <div class="auth-field"><label for="authConfirmPassword">Confirmar nova senha</label><input id="authConfirmPassword" type="password" autocomplete="new-password" minlength="8"></div>
+      <button type="button" id="authResetSubmit" onclick="authSaveNewPassword()" style="width:100%;min-height:44px;background:#D14203;border:0;border-radius:9px;color:white;font-weight:700;cursor:pointer">Salvar nova senha</button>
+    </div>
     <div style="margin-top:18px;font-size:11px;color:var(--dim);text-align:center">
       Acesso restrito · ArznStoreSP © 2026
     </div>
@@ -1248,6 +1253,40 @@ function authSetLoading(loading){
     btn.disabled=false;
   }
 }
+var AUTH_RECOVERY_MODE=false;
+function authShowRecoveryMode(){
+  AUTH_RECOVERY_MODE=true;
+  var panel=document.getElementById('authResetPanel');
+  if(panel)panel.hidden=false;
+  ['authPwd','authSubmit','authForgot'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
+  var overlay=document.getElementById('authOverlay');if(overlay)overlay.hidden=false;
+  var notice=document.getElementById('authNotice');
+  if(notice){notice.textContent='Defina sua nova senha para continuar.';notice.classList.add('show');}
+}
+async function authSaveNewPassword(){
+  if(!sb)return;
+  var password=document.getElementById('authNewPassword').value;
+  var confirm=document.getElementById('authConfirmPassword').value;
+  if(password.length<8){authShowError('A senha precisa ter pelo menos 8 caracteres.');return;}
+  if(password!==confirm){authShowError('As senhas não coincidem.');return;}
+  authClearError();
+  var btn=document.getElementById('authResetSubmit');
+  btn.disabled=true;btn.textContent='Salvando…';
+  try{
+    var result=await sb.auth.updateUser({password:password});
+    if(result.error){authShowError('Não foi possível atualizar a senha. Solicite outro link e tente novamente.');return;}
+    AUTH_RECOVERY_MODE=false;
+    document.getElementById('authResetPanel').hidden=true;
+    ['authPwd','authSubmit','authForgot'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='';});
+    document.getElementById('authNewPassword').value='';
+    document.getElementById('authConfirmPassword').value='';
+    await sb.auth.signOut();
+    _applyAuthState(null,null);
+    var notice=document.getElementById('authNotice');
+    if(notice){notice.textContent='Senha atualizada com sucesso! Entre usando a nova senha.';notice.classList.add('show');}
+  }catch(e){authShowError('Erro ao atualizar a senha. Tente novamente.');}
+  finally{btn.disabled=false;btn.textContent='Salvar nova senha';}
+}
 async function authForgotPassword(){
   if(!sb){authShowError('Serviço indisponível. Recarregue a página.');return;}
   var email=(document.getElementById('authEmail').value||'').trim();
@@ -1340,6 +1379,9 @@ function initSupabase(){
     sb=supabase.createClient(SUPA_URL,SUPA_KEY);
     // Listen to auth state changes
     sb.auth.onAuthStateChange(async function(event, session){
+      if(event==='PASSWORD_RECOVERY'){authShowRecoveryMode();return;}
+      if(AUTH_RECOVERY_MODE){var overlay=document.getElementById('authOverlay');if(overlay)overlay.hidden=false;return;}
+
       if(session && session.user){
         var role=await _fetchRole(session.user.id);
         if(!role){
@@ -1356,6 +1398,8 @@ function initSupabase(){
     });
     // Check existing session on load
     sb.auth.getSession().then(async function(res){
+      if(AUTH_RECOVERY_MODE)return;
+
       var session=res&&res.data&&res.data.session;
       if(session && session.user){
         var role=await _fetchRole(session.user.id);

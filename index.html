@@ -72,6 +72,15 @@ a{color:var(--orange);text-decoration:none}
 }
 #authError.show{display:block}
 #authSubmit{width:100%;height:44px;font-size:15px;font-weight:700;margin-top:4px}
+#authSubmit{display:flex!important;align-items:center;justify-content:center;background:#D14203!important;color:#fff!important;border:1px solid #E65B1D!important;border-radius:9px!important;cursor:pointer;box-shadow:0 5px 20px rgba(209,66,3,.22);transition:background .2s,transform .2s}
+#authSubmit:hover:not(:disabled){background:#E65B1D!important;transform:translateY(-1px)}
+#authSubmit:focus-visible,.auth-forgot:focus-visible{outline:2px solid #fff;outline-offset:3px}
+#authSubmit:disabled{opacity:.7;cursor:wait}
+.auth-forgot{display:block;margin:15px auto 0;padding:7px 8px;background:transparent;border:0;color:#FF9A63;font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.auth-forgot:hover{color:#fff}
+#authNotice{display:none;background:rgba(34,197,94,.12);border:1px solid #22C55E;color:#B4F5CA;border-radius:8px;padding:10px 14px;font-size:12px;margin-bottom:14px}
+#authNotice.show{display:block}
+
 .auth-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -488,6 +497,7 @@ input:hover,textarea:hover{border-color:var(--line-2)}
     <div class="auth-logo">Arzn<span>Store</span>SP</div>
     <div class="auth-sub">Central de Vendas · Acesso</div>
     <div id="authError"></div>
+    <div id="authNotice" role="status" aria-live="polite"></div>
     <div class="auth-field">
       <label for="authEmail">E-mail</label>
       <input id="authEmail" type="email" placeholder="seu@email.com" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('authPwd').focus()">
@@ -497,6 +507,7 @@ input:hover,textarea:hover{border-color:var(--line-2)}
       <input id="authPwd" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')authLogin()">
     </div>
     <button id="authSubmit" class="btn btn-primary" onclick="authLogin()">Entrar</button>
+    <button type="button" class="auth-forgot" id="authForgot" onclick="authForgotPassword()">Esqueceu sua senha?</button>
     <div style="margin-top:18px;font-size:11px;color:var(--dim);text-align:center">
       Acesso restrito · ArznStoreSP © 2026
     </div>
@@ -1236,6 +1247,27 @@ function authSetLoading(loading){
     btn.innerHTML='Entrar';
     btn.disabled=false;
   }
+}
+async function authForgotPassword(){
+  if(!sb){authShowError('Serviço indisponível. Recarregue a página.');return;}
+  var email=(document.getElementById('authEmail').value||'').trim();
+  if(!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){
+    authShowError('Informe um e-mail válido no campo acima para recuperar sua senha.');
+    document.getElementById('authEmail').focus();
+    return;
+  }
+  authClearError();
+  var notice=document.getElementById('authNotice');
+  if(notice){notice.classList.remove('show');notice.textContent='';}
+  var btn=document.getElementById('authForgot');
+  if(btn){btn.disabled=true;btn.textContent='Enviando…';}
+  try{
+    var redirect=window.location.origin+window.location.pathname;
+    var result=await sb.auth.resetPasswordForEmail(email,{redirectTo:redirect});
+    if(result.error){authShowError('Não foi possível solicitar a recuperação agora. Aguarde um momento e tente novamente.');}
+    else if(notice){notice.textContent='Se este e-mail estiver cadastrado, você receberá um link para redefinir sua senha. Verifique também o spam.';notice.classList.add('show');}
+  }catch(e){authShowError('Não foi possível solicitar a recuperação. Tente novamente.');}
+  finally{if(btn){btn.disabled=false;btn.textContent='Esqueceu sua senha?';}}
 }
 async function authLogin(){
   if(!sb){ authShowError('Serviço indisponível. Recarregue a página.'); return; }

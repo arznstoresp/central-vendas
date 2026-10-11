@@ -5,7 +5,7 @@
 <!-- v3 --><title>Central de Vendas · ArznStoreSP</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -1525,25 +1525,43 @@ function saveVendedora(){
 }
 
 // ====================== ADMIN ======================
+// Gera hash SHA-256 hexadecimal (async, retorna Promise<string>)
+function _hashPwd(s){
+  return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s))
+    .then(function(buf){ return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join(''); });
+}
+// Verifica se o valor salvo está em texto puro (legado, <64 chars ou não-hex) e migra
+function _migrateLegacyPwd(raw){
+  if(!raw) return Promise.resolve(null);
+  // Hash SHA-256 tem exatamente 64 chars hex; qualquer outra coisa é legado
+  if(raw.length===64 && /^[0-9a-f]+$/.test(raw)) return Promise.resolve(raw); // já hash
+  return _hashPwd(raw).then(function(h){ localStorage.setItem('cv_admin_pwd',h); return h; });
+}
 function checkAdmin(){
   var pwd=document.getElementById('adminPwd').value;
   var saved=localStorage.getItem('cv_admin_pwd');
   if(!saved){
     // Primeiro acesso: forçar configuração de senha
     if(pwd.length<6){ toast('Defina uma senha com pelo menos 6 caracteres.','err'); return; }
-    localStorage.setItem('cv_admin_pwd',pwd);
-    adminUnlocked=true;
-    document.getElementById('adminLock').hidden=true;
-    document.getElementById('adminArea').hidden=false;
-    loadAdminArea();
-    toast('Senha criada com sucesso!','ok');
-  } else {
-    if(pwd===saved){
+    _hashPwd(pwd).then(function(h){
+      localStorage.setItem('cv_admin_pwd',h);
       adminUnlocked=true;
       document.getElementById('adminLock').hidden=true;
       document.getElementById('adminArea').hidden=false;
       loadAdminArea();
-    } else { toast('Senha incorreta','err'); }
+      toast('Senha criada com sucesso!','ok');
+    });
+  } else {
+    _migrateLegacyPwd(saved).then(function(savedHash){
+      return _hashPwd(pwd).then(function(pwdHash){ return [savedHash, pwdHash]; });
+    }).then(function(pair){
+      if(pair[0]===pair[1]){
+        adminUnlocked=true;
+        document.getElementById('adminLock').hidden=true;
+        document.getElementById('adminArea').hidden=false;
+        loadAdminArea();
+      } else { toast('Senha incorreta','err'); }
+    });
   }
 }
 function lockAdmin(){
@@ -1677,14 +1695,19 @@ function saveAdminConfig(){
   var sp=document.getElementById('adminSenha').value;
   localStorage.setItem('cv_vendedora_nome',fn);
   localStorage.setItem('cv_alan_wa',aw);
-  if(sp) localStorage.setItem('cv_admin_pwd',sp);
-  toast('Configurações salvas ✓','ok');
+  if(sp){
+    if(sp.length<6){ toast('Nova senha deve ter pelo menos 6 caracteres.','err'); return; }
+    _hashPwd(sp).then(function(h){ localStorage.setItem('cv_admin_pwd',h); toast('Configurações salvas ✓','ok'); });
+  } else {
+    toast('Configurações salvas ✓','ok');
+  }
 }
 
 // ====================== BACKUP ======================
 var _backupPendente=null;
 function exportarBackup(){
-  var keys=Object.keys(localStorage).filter(function(k){ return k.startsWith('cv_'); });
+  // cv_admin_pwd é excluído do backup por segurança (hash, mas não deve ser portado)
+  var keys=Object.keys(localStorage).filter(function(k){ return k.startsWith('cv_') && k!=='cv_admin_pwd'; });
   var data={};
   keys.forEach(function(k){ data[k]=localStorage.getItem(k); });
   data._exportedAt=new Date().toISOString();
@@ -1729,10 +1752,10 @@ function confirmarRestore(){
   if(!_backupPendente){ document.getElementById('modalBackup').hidden=true; return; }
   var data=_backupPendente;
   _backupPendente=null;
-  // Remover chaves cv_ atuais
-  Object.keys(localStorage).filter(function(k){ return k.startsWith('cv_'); }).forEach(function(k){ localStorage.removeItem(k); });
-  // Restaurar do backup
-  Object.keys(data).filter(function(k){ return k.startsWith('cv_'); }).forEach(function(k){ localStorage.setItem(k,data[k]); });
+  // Remover chaves cv_ atuais (exceto a senha do admin, que não é portável)
+  Object.keys(localStorage).filter(function(k){ return k.startsWith('cv_') && k!=='cv_admin_pwd'; }).forEach(function(k){ localStorage.removeItem(k); });
+  // Restaurar do backup (nunca restaura cv_admin_pwd)
+  Object.keys(data).filter(function(k){ return k.startsWith('cv_') && k!=='cv_admin_pwd'; }).forEach(function(k){ localStorage.setItem(k,data[k]); });
   document.getElementById('modalBackup').hidden=true;
   toast('Backup restaurado! Recarregando…','ok');
   setTimeout(function(){ location.reload(); },1500);
@@ -1895,7 +1918,7 @@ function renderCatalog(){
 }
 
 // ====================== UTIL ======================
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 function toast(msg,type,dur){
   var el=document.createElement('div');
   el.className='toast'+(type?' '+type:'');
@@ -2437,9 +2460,11 @@ function pad(n){ return String(n).padStart(2,"0"); }
 function byId(id){ return S.products.filter(function(p){return p.id===id;})[0]; }
 var statusTimer;
 function setStatus(msg, kind, keep){
-  var el=$("status"); el.textContent=msg||""; el.className=kind||""; el.title=msg||"";
+  var el=$("status"); if(!el) return;
+  var safeMsg=(msg===undefined||msg===null)?"":(String(msg)||"");
+  el.textContent=safeMsg; el.className=kind||""; el.title=safeMsg;
   clearTimeout(statusTimer);
-  if(msg && !keep) statusTimer=setTimeout(function(){ el.textContent=""; el.className=""; }, 6000);
+  if(safeMsg && !keep) statusTimer=setTimeout(function(){ el.textContent=""; el.className=""; }, 6000);
 }
 var __mctx=null;
 function measureCtx(){
@@ -3122,8 +3147,7 @@ var _btnBlank=$("btnBlank"); if(_btnBlank) _btnBlank.addEventListener("click",fu
   S.products.push(newProduct({open:true})); renderList(); schedule();
   var last=$("list").lastElementChild; if(last){ var inp=last.querySelector(".f-name"); if(inp) inp.focus(); }
 });
-$("btnExport").addEventListener("click",exportPPTX);
-$("btnExportPdf").addEventListener("click",exportPDF);
+/* btnExport e btnExportPdf são bindados apenas dentro de _initCatalog() — sem binding duplicado aqui */
 $("btnReset").addEventListener("click",function(){
   if(!S.products.length && !S.client.name && !S.client.cnpj) return;
   if(!window.confirm("Limpar cliente e produtos? Os textos de capa, fechamento e contato são mantidos.")) return;

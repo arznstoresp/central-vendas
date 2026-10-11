@@ -1868,14 +1868,23 @@ function renderCatalog(){
   PRODUTOS.forEach(function(p){ if(p.visivelVendedor!==false && cats.indexOf(p.cat)===-1) cats.push(p.cat); });
   cats.sort();
 
-  // Render filter chips
+  // Render filter chips (data-cat attribute — no inline JS execution)
   if(chipsEl){
-    chipsEl.innerHTML=['<button class="chip'+(filterActive===''?' active':'')+'" onclick="filterActive=\'\';renderCatalog()" style="cursor:pointer">Todos</button>']
+    chipsEl.innerHTML=['<button class="chip'+(filterActive===''?' active':'')+'" data-cat="" style="cursor:pointer">Todos</button>']
       .concat(cats.map(function(c){
         var icon=CAT_IC[c]||'tag';
-        return '<button class="chip'+(filterActive===c?' active':'')+'" onclick="filterActive=\''+esc(c)+'\';renderCatalog()" style="cursor:pointer">'
+        return '<button class="chip'+(filterActive===c?' active':'')+'" data-cat="'+esc(c)+'" style="cursor:pointer">'
           +'<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'13\' height=\'13\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><use href=\'#icon-'+icon+'\'/></svg> '+esc(c)+'</button>';
       })).join('');
+    if(!chipsEl._catListener){
+      chipsEl._catListener=true;
+      chipsEl.addEventListener('click',function(e){
+        var btn=e.target.closest('button[data-cat]');
+        if(!btn) return;
+        filterActive=btn.getAttribute('data-cat');
+        renderCatalog();
+      });
+    }
   }
 
   var q=(document.getElementById('searchInput')||{}).value||'';

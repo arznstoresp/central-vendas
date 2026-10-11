@@ -43,6 +43,26 @@ button,input,select,textarea{font:inherit;color:inherit}
 img{display:block}
 a{color:var(--orange);text-decoration:none}
 
+/* UI refinements: catalog generator, CRM and admin */
+#page-gen-catalogo .editor{background:#0e1420;gap:16px!important}
+#page-gen-catalogo .editor>div{border-radius:12px!important;padding:16px!important;background:#131c2b!important;border-color:rgba(255,255,255,.12)!important}
+#page-gen-catalogo #cat-prod-chips{gap:8px!important;max-height:220px!important;padding:6px 0!important}
+#page-gen-catalogo #cat-prod-chips button{min-height:32px!important;padding:7px 10px!important;border-radius:8px!important;font-size:12px!important;line-height:1.35!important}
+#page-gen-catalogo #list{margin-top:14px!important}
+#page-gen-catalogo .editor input{min-height:36px;border-radius:8px!important}
+#page-gen-catalogo .editor label{font-size:12px!important}
+#page-gen-catalogo .editor .empty{padding:20px 12px!important;line-height:1.6!important;font-size:12px!important}
+#page-catalogo .filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px;scrollbar-width:thin}
+#page-catalogo .filters button{flex-shrink:0}
+#page-admin #adminArea>.stack{gap:20px}
+#page-admin #adminArea .card{border-radius:13px;border-color:rgba(255,255,255,.11);padding:22px}
+#page-admin #adminArea .card-title{font-size:15px;margin-bottom:14px}
+#page-admin #adminArea .field input{min-height:42px}
+#page-textos .card{border-radius:12px}
+.crm-delete-btn{background:transparent;border:1px solid rgba(239,68,68,.35);color:#ff8585;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer}
+.crm-delete-btn:hover{background:rgba(239,68,68,.13)}
+@media(max-width:700px){#page-gen-catalogo .editor{width:100%!important;min-width:0!important}#page-admin #adminArea .card{padding:16px}}
+
 /* ===================== AUTH OVERLAY ===================== */
 #authOverlay{
   position:fixed;inset:0;z-index:9999;
@@ -852,10 +872,10 @@ input:hover,textarea:hover{border-color:var(--line-2)}
       <div class="pg-sub">Scripts de abordagem para WhatsApp</div>
     </div>
     <div class="card">
-      <div class="card-title">Personalize com seu nome</div>
+      <div class="card-title">Personalize as mensagens de prospecção</div>\n      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Digite o nome de quem vai enviar as mensagens. O nome aparece automaticamente nos textos abaixo. O WhatsApp do gestor fica salvo como referência; depois é só clicar em Copiar e enviar ao cliente.</p>
       <div class="row">
-        <div class="field" style="flex:1"><label>Seu nome</label><input id="vendedoraNome" placeholder="Ex.: Maria" oninput="saveVendedora()"></div>
-        <div class="field" style="flex:1"><label>WhatsApp do gestor (Alan)</label><input id="alanWa" placeholder="5511988011285" oninput="saveVendedora()"></div>
+        <div class="field" style="flex:1"><label>Nome do vendedor ou vendedora</label><input id="vendedoraNome" placeholder="Ex.: Maria" oninput="saveVendedora()"></div>
+        <div class="field" style="flex:1"><label>WhatsApp do gestor (referência)</label><input id="alanWa" placeholder="5511988011285" oninput="saveVendedora()"></div>
       </div>
     </div>
     <div id="scriptsList" class="stack"></div>
@@ -1670,7 +1690,7 @@ function renderCRM() {
       html+='<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--muted)">'+esc(c.status||'—')+'</span></div>';
       html+='<div style="font-size:12px;color:var(--muted);margin-top:3px">'+esc(c.contato||'')+' · '+esc(c.seg||'')+' · '+esc(c.interesse||'')+'</div>';
       html+='<div style="font-size:11px;color:var(--muted);margin-top:4px">⏱ '+diasStr+proxStr+'</div>';
-      html+='</div>'+waLink+'</div></div>';
+      html+='</div>'+waLink+(AUTH_ROLE==='admin'?'<button type="button" class="crm-delete-btn" title="Excluir contato" onclick="event.stopPropagation();deleteContact(\''+c.id+'\')">Excluir</button>':'')+'</div></div>';
     }
     return html;
   }
@@ -1754,7 +1774,7 @@ async function deleteContact(id){
   if(sb && AUTH_USER){
     setSyncStatus('syncing');
     var r=await sb.from('contatos').delete().eq('id',id);
-    if(r.error){ console.warn('Supabase delete err',r.error); setSyncStatus('err'); }
+    if(r.error){ console.warn('Supabase delete err',r.error); setSyncStatus('err'); toast('Não foi possível excluir o contato no servidor.','err'); return; }
     else setSyncStatus('ok');
   }
   contacts=contacts.filter(function(c){return c.id!==id});

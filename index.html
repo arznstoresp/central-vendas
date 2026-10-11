@@ -2768,6 +2768,7 @@ async function exportPDF(){
   if(typeof window.jspdf==="undefined"||typeof html2canvas==="undefined"){ setStatus("O gerador de PDF não carregou. Recarregue a página.","err",true); return; }
   var btn=$("btnExportPdf"); btn.disabled=true;
   try{
+    if(document.fonts&&document.fonts.ready) await document.fonts.ready;
     var slides=buildSlides(S);
     var doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"in",format:[W,H],compress:true});
     for(var i=0;i<slides.length;i++){

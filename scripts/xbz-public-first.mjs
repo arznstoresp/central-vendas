@@ -54,12 +54,12 @@ try {
  const qtyInput=page.locator('#filtroQuantidade,input[name="filtroQuantidade"]').first();
  if(!await queryInput.count()||!await qtyInput.count())throw Error('XBZ search inputs not found');
  const results=[];
- for(const product of catalog.slice(0,10)){
+ for(const product of catalog.slice(0,100)){
   await queryInput.fill(product.codigo_xbz);
   await qtyInput.fill('1');
   const search=page.getByRole('button',{name:/buscar produtos/i}).first();
   await search.click();
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(2500);
   const rows=await page.locator('table tbody tr').allInnerTexts();
   results.push({codigo_xbz:product.codigo_xbz,rows:rows.slice(0,3).map(s=>s.slice(0,280))});
  }

@@ -693,7 +693,7 @@ input:hover,textarea:hover{border-color:var(--line-2)}
       </div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Pesquise por nome ou SKU e clique para adicionar:</div>
       <input id="cat-product-search" type="search" placeholder="Buscar caneta, copo, SKU..." aria-label="Buscar produtos para o catálogo" oninput="buildProductPicker()" style="width:100%;height:38px;padding:8px 10px;background:#0A0D14;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;margin-bottom:8px">
-      <div id="cat-prod-chips" style="display:flex;flex-wrap:wrap;gap:4px;max-height:150px;overflow-y:auto;padding-bottom:4px"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:4px 0 10px"><label style="font-size:11px;color:var(--muted)">Exibir: <select id="cat-product-view" onchange="buildProductPicker()" style="background:#111a28;color:#fff;border:1px solid #384355;border-radius:7px;padding:6px"><option value="popular">Mais procurados</option><option value="all">Todos</option><option value="selected">Selecionados</option></select></label><span id="cat-product-result-count" style="font-size:11px;color:var(--muted)"></span></div><div id="cat-prod-chips" role="group" aria-label="Seleção de produtos" style="display:flex;flex-wrap:wrap;gap:7px;max-height:260px;overflow-y:auto;padding-bottom:8px"></div><div style="font-size:11px;color:var(--muted);margin-top:8px">Os itens selecionados aparecem abaixo para edição. Pesquise pelo código XBZ ou SKU para localizar qualquer produto.</div>
       <div id="list" style="margin-top:8px"></div>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px">
@@ -2706,31 +2706,37 @@ function toCatProd(p){
 }
 
 function buildProductPicker(){
-  var container = document.getElementById("cat-prod-chips");
-  if(!container) return;
-  var allProds = (typeof window.PRODUTOS !== "undefined") ? window.PRODUTOS : [];
-  var query=(document.getElementById("cat-product-search")||{}).value||"";
-  query=query.toLocaleLowerCase("pt-BR").trim();
-  allProds=allProds.filter(function(p){
-    if(p.visivelVendedor===false)return false;
+  var container=document.getElementById("cat-prod-chips");
+  if(!container)return;
+  var search=document.getElementById("cat-product-search");
+  var query=(search?search.value:"").toLocaleLowerCase("pt-BR").trim();
+  var mode=(document.getElementById("cat-product-view")||{}).value||"popular";
+  var all=(typeof window.PRODUTOS!=="undefined"?window.PRODUTOS:[]).filter(function(p){return p.visivelVendedor!==false;});
+  var selected={};
+  S.products.forEach(function(p){selected[p.id]=true;});
+  var popular=all.filter(function(p){return p.status==="venda-rapida";});
+  if(!popular.length)popular=all.slice(0,12);
+  var pool=query?all:(mode==="selected"?all.filter(function(p){return selected["cv_"+p.id];}):(mode==="popular"?popular:all));
+  var filtered=pool.filter(function(p){
     if(!query)return true;
-    return ((p.nome||"")+" "+(p.sku||"")+" "+(p.codigoXbz||"")+" "+(p.cat||"")).toLocaleLowerCase("pt-BR").includes(query);
-  }).slice(0,40);
-  container.innerHTML = "";
-  if(!allProds.length){container.textContent="Nenhum produto encontrado. Tente outro nome ou SKU.";return;}
-  allProds.forEach(function(p){
-    var btn = document.createElement("button");
-    btn.type = "button";
-    var sel = S.products.some(function(cp){ return cp.id === "cv_"+p.id; });
-    btn.style.cssText = "padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;font-family:Montserrat,sans-serif;transition:all .15s;border:1px solid " + (sel ? "#D14203;background:#D14203;color:#fff;" : "#555;background:transparent;color:#aaa;");
-    btn.textContent = p.nome||p.name||"Produto";
-    btn.onclick = function(){
-      var idx = S.products.findIndex(function(cp){ return cp.id === "cv_"+p.id; });
-      if(idx >= 0){ S.products.splice(idx,1); }
-      else { S.products.push(toCatProd(p)); }
-      buildProductPicker();
-      renderList();
-      renderPreview();
+    var hay=[p.nome,p.sku,p.codigoXbz,p.cat,p.desc].join(" ").toLocaleLowerCase("pt-BR");
+    return hay.includes(query);
+  });
+  var shown=filtered.slice(0,60);
+  var counter=document.getElementById("cat-product-result-count");
+  if(counter)counter.textContent=filtered.length+" encontrado(s)"+(filtered.length>60?" · exibindo 60":"")+" · "+S.products.length+" selecionado(s)";
+  container.replaceChildren();
+  if(!shown.length){var empty=document.createElement("div");empty.style.cssText="font-size:12px;color:#9aa8bc;padding:16px 0";empty.textContent="Nenhum produto encontrado. Tente outro nome ou SKU.";container.appendChild(empty);return;}
+  shown.forEach(function(p){
+    var btn=document.createElement("button");btn.type="button";
+    var sel=!!selected["cv_"+p.id];
+    btn.setAttribute("aria-pressed",String(sel));
+    btn.style.cssText="padding:9px 12px;border-radius:9px;font-size:12px;cursor:pointer;text-align:left;line-height:1.45;font-family:Montserrat,sans-serif;transition:all .15s;border:1px solid "+(sel?"#E65B1D;background:#57250e;color:#fff;":"#384355;background:#121b2a;color:#dce4ef;");
+    btn.textContent=(sel?"✓ ":"+ ")+(p.nome||p.name||"Produto")+(p.sku?" · "+p.sku:"");
+    btn.onclick=function(){
+      var idx=S.products.findIndex(function(cp){return cp.id==="cv_"+p.id;});
+      if(idx>=0)S.products.splice(idx,1);else S.products.push(toCatProd(p));
+      buildProductPicker();renderList();renderPreview();
     };
     container.appendChild(btn);
   });

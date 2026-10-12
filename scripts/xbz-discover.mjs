@@ -45,16 +45,23 @@ try {
      try{
        await quantity.fill('1',{timeout:7000});
        productsView.quantitySet=true;
-       const searchButton=page.getByRole('button',{name:/pesquisar|buscar/i}).first();
+       const searchButton=page.getByRole('button',{name:/^BUSCAR PRODUTOS$/i}).first();
        const searchInput=page.locator('input[type="submit"][value*="pesquis" i],input[type="button"][value*="pesquis" i]').first();
        if(await searchButton.count()){await searchButton.click({timeout:9000});productsView.searchClicked=true;}
        else if(await searchInput.count()){await searchInput.click({timeout:9000});productsView.searchClicked=true;}
-       if(productsView.searchClicked)await page.waitForTimeout(2500);
+       if(productsView.searchClicked){await page.waitForTimeout(5000);await page.locator('table tbody tr').first().waitFor({state:'attached',timeout:15000}).catch(()=>{});}
      }catch(e){productsView.searchError=String(e.message||e).slice(0,180);}
    }
    productsView.inputs=await page.locator('input').evaluateAll(els=>els.filter(e=>e.type!=='password'&&e.type!=='hidden').map(e=>({type:e.type,name:e.name,id:e.id,placeholder:e.placeholder,ariaLabel:e.getAttribute('aria-label')})).slice(0,35));
    // Apenas estrutura e amostra limitada de produtos após a pesquisa.
    // Não captura pedidos, contatos ou tokens.
+   const resultTable=page.locator('table').first();
+   productsView.searchDiagnostics={
+     quantityValue:await quantity.inputValue().catch(()=>null),
+     tableText:(await resultTable.innerText().catch(()=>'' )).slice(0,1500),
+     tableHtmlStructure:await resultTable.evaluate(el=>({rows:el.querySelectorAll('tr').length,tbodyRows:el.querySelectorAll('tbody tr').length,bodyText:el.innerText.slice(0,900)})).catch(()=>null),
+     resultText:(await page.locator('body').innerText()).match(/(?:nenhum produto|nenhum resultado|carregando|exibindo|encontrados|resultado[^\\n]{0,80})/ig)?.slice(0,12)||[]
+   };
    productsView.searchResults={
      tableRows:await page.locator('table tbody tr').count(),
      tableHeaders:(await page.locator('table thead th').allTextContents()).map(s=>s.trim()).slice(0,25),

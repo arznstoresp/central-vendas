@@ -1,0 +1,33 @@
+name: XBZ - validar e importar catálogo
+on:
+  workflow_dispatch:
+    inputs:
+      importar:
+        description: "Gravar novos produtos como rascunho (false = somente validar)"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "15 9 * * 1"
+permissions:
+  contents: read
+jobs:
+  validar-importar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validar arquivo sem gravar
+        run: node scripts/import-xbz.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Importar rascunhos
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.importar }}
+        run: node scripts/import-xbz.mjs
+        env:
+          APPLY_IMPORT: "true"
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

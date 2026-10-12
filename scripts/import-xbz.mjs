@@ -1,7 +1,6 @@
 // Importador de catálogo XBZ: valida dados fornecidos, não faz scraping.
 import { readFile } from 'node:fs/promises';
 const url=process.env.SUPABASE_URL, key=process.env.SUPABASE_SERVICE_ROLE_KEY;
-if(!url||!key)throw Error('Configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY nos GitHub Actions Secrets.');
 const path=process.argv[2]||'data/xbz-products.json';
 const products=JSON.parse(await readFile(path,'utf8'));
 if(!Array.isArray(products))throw Error('Arquivo deve conter uma lista JSON.');
@@ -18,6 +17,7 @@ for(const [i,p] of products.entries()){
  clean.push({codigo_xbz:codigo,nome,sku:String(p.sku||'').slice(0,80)||null,modelo:String(p.modelo||'').slice(0,120)||null,categoria:String(p.categoria||'').slice(0,120)||null,descricao:String(p.descricao||'').slice(0,3000)||null,imagem_url:img||null,link_fornecedor:link||null,status:'rascunho',origem:'xbz'});
 }
 if(!clean.length){console.log('Nenhum produto novo no arquivo; nenhuma alteração.');process.exit(0);}
+if(!url||!key)throw Error('Configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY nos GitHub Actions Secrets.');
 if(process.env.APPLY_IMPORT!=='true'){console.log('VALIDAÇÃO OK: '+clean.length+' registros, sem gravar no banco.');process.exit(0);}
 const endpoint=url.replace(/\/$/,'')+'/rest/v1/produtos_xbz?on_conflict=codigo_xbz';
 for(let i=0;i<clean.length;i+=100){

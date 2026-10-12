@@ -15,7 +15,7 @@ try {
    if(!/^[0-9]{4,6}[A-Za-z]{0,3}$/.test(code))continue;
    const text=(a.innerText||'').replace(/\\s+/g,' ').trim();
    const parent=a.closest('article,li,.produto,.item,.product,.box')||a.parentElement?.parentElement;
-   const name=(parent?.innerText||text).replace(/\\s+/g,' ').trim().replace(new RegExp('^'+code+'\\\\s*'),'').slice(0,180);
+   const name=(parent?.innerText||text).replace(/\\s+/g,' ').trim().replace(new RegExp('^'+code+'\\s*'),'').slice(0,180);
    const img=parent?.querySelector('img')?.getAttribute('src')||a.querySelector('img')?.getAttribute('src')||null;
    if(!found.has(code))found.set(code,{codigo_xbz:code,nome:name||code,link_fornecedor:url.href,imagem_url:img?new URL(img,url.href).href:null});
   }

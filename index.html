@@ -1084,6 +1084,33 @@ var PRODUTOS = [
 ];
 window.PRODUTOS = PRODUTOS;
 
+/* Catálogo Supabase: preserva os produtos locais e acrescenta apenas SKUs validados. */
+var _xbzCatalogLoaded=false;
+async function loadXbzCatalog(){
+  if(!sb||!AUTH_USER)return;
+  try{
+    var response=await sb.from('produtos_xbz').select('codigo_xbz,nome,sku,modelo,categoria,descricao,imagem_url,link_fornecedor,status').eq('status','validado').limit(1000);
+    if(response.error){console.warn('[Catálogo XBZ] Falha de leitura:',response.error.message);return;}
+    var existing=new Set(PRODUTOS.map(function(p){return String(p.codigoXbz||'').trim();}).filter(Boolean));
+    var count=0;
+    (response.data||[]).forEach(function(p){
+      var code=String(p.codigo_xbz||'').trim();
+      if(!code||existing.has(code))return;
+      var safeCode=code.replace(/[^a-zA-Z0-9_-]/g,'_');
+      PRODUTOS.push({
+        id:'xbz_'+safeCode,nome:p.nome,sku:p.sku||code,codigoXbz:code,
+        cat:p.categoria||p.modelo||'Outros produtos',desc:p.descricao||'',
+        imagem:p.imagem_url||'',linkFornecedor:p.link_fornecedor||'',
+        fornecedor:'XBZ Brindes',status:'catalogo'
+      });
+      existing.add(code);count++;
+    });
+    _xbzCatalogLoaded=true;
+    if(count){console.info('[Catálogo XBZ] Produtos validados adicionados:',count);if(typeof renderCatalog==='function')renderCatalog();if(typeof buildProductPicker==='function')buildProductPicker();}
+  }catch(err){console.warn('[Catálogo XBZ] Erro inesperado:',err);}
+}
+
+
 var SEGMENTOS = {
   'Academia':['Squeeze','Garrafa térmica','Toalha esportiva','Camiseta dry fit','Mochila','Boné'],
   'Escritório':['Caneta','Caderno executivo','Mousepad','Bloco','Kit onboarding','Caneca'],
@@ -1383,6 +1410,7 @@ function _applyAuthState(user, role){
     if(adminBtn) adminBtn.style.display=(role==='admin'?'':'none');
     setSyncStatus('syncing');
     loadFromSupabase();
+    loadXbzCatalog();
     subscribeRealtime();
   } else {
     // Show login screen

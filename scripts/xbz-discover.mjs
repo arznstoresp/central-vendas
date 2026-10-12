@@ -22,16 +22,23 @@ try {
  if(/acesso não autorizado|não foi possível entrar|usuário ou senha inválid/i.test(visible))throw Error('Login não autorizado; revise credenciais privadas');
  const links=await page.locator('a[href]').evaluateAll(els=>els.map(a=>({text:(a.innerText||'').trim().slice(0,100),href:a.href})).filter(x=>x.text&&x.href.startsWith('https://minhaxbz.com.br')).slice(0,150));
  // Descoberta estrutural da tela de produtos, sem capturar clientes, pedidos ou segredos.
- const productsMenu=page.getByText('PRODUTOS',{exact:true}).first();
- let productsView={found:false};
+ const productsMenu=page.locator('a[href]').filter({hasText:/^\\s*PRODUTOS\\s*$/i}).first();
+ let productsView={found:false,menuMatches:await productsMenu.count(),clickSucceeded:false};
  if(await productsMenu.count()){
-   await productsMenu.click({timeout:8000}).catch(()=>{});
-   await page.waitForTimeout(1800);
+   try{
+     await productsMenu.click({timeout:12000});
+     productsView.clickSucceeded=true;
+   }catch(e){
+     productsView.clickError=String(e.message||e).slice(0,180);
+     // Click the link directly only when Playwright cannot activate it normally.
+     try{await productsMenu.evaluate(el=>el.click());productsView.clickSucceeded=true;}catch{}
+   }
+   await page.waitForTimeout(3000);
    const headings=await page.locator('h1,h2,h3,h4').allTextContents();
    const buttons=await page.locator('button').evaluateAll(els=>els.map(e=>(e.innerText||e.getAttribute('aria-label')||'').trim().slice(0,60)).filter(Boolean).slice(0,50));
    const tables=await page.locator('table').count();
    const productLinks=await page.locator('a[href]').evaluateAll(els=>els.map(e=>({text:(e.innerText||'').trim().slice(0,50),path:new URL(e.href).pathname})).filter(x=>/produto|catalog|vitrine/i.test(x.text+' '+x.path)).slice(0,60));
-   productsView={found:true,urlPath:new URL(page.url()).pathname,headings:headings.slice(0,30),buttons,tables,productLinks};
+   productsView={...productsView,found:true,urlPath:new URL(page.url()).pathname,headings:headings.slice(0,30),buttons,tables,productLinks};
  }
  await mkdir('artifacts',{recursive:true});
  await writeFile('artifacts/xbz-discovery.json',JSON.stringify({title,url:current,links,productsView},null,2));

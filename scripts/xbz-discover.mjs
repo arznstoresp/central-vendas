@@ -21,7 +21,19 @@ try {
  const visible=(await page.locator('body').innerText()).slice(0,10000);
  if(/acesso não autorizado|não foi possível entrar|usuário ou senha inválid/i.test(visible))throw Error('Login não autorizado; revise credenciais privadas');
  const links=await page.locator('a[href]').evaluateAll(els=>els.map(a=>({text:(a.innerText||'').trim().slice(0,100),href:a.href})).filter(x=>x.text&&x.href.startsWith('https://minhaxbz.com.br')).slice(0,150));
+ // Descoberta estrutural da tela de produtos, sem capturar clientes, pedidos ou segredos.
+ const productsMenu=page.getByText('PRODUTOS',{exact:true}).first();
+ let productsView={found:false};
+ if(await productsMenu.count()){
+   await productsMenu.click({timeout:8000}).catch(()=>{});
+   await page.waitForTimeout(1800);
+   const headings=await page.locator('h1,h2,h3,h4').allTextContents();
+   const buttons=await page.locator('button').evaluateAll(els=>els.map(e=>(e.innerText||e.getAttribute('aria-label')||'').trim().slice(0,60)).filter(Boolean).slice(0,50));
+   const tables=await page.locator('table').count();
+   const productLinks=await page.locator('a[href]').evaluateAll(els=>els.map(e=>({text:(e.innerText||'').trim().slice(0,50),path:new URL(e.href).pathname})).filter(x=>/produto|catalog|vitrine/i.test(x.text+' '+x.path)).slice(0,60));
+   productsView={found:true,urlPath:new URL(page.url()).pathname,headings:headings.slice(0,30),buttons,tables,productLinks};
+ }
  await mkdir('artifacts',{recursive:true});
- await writeFile('artifacts/xbz-discovery.json',JSON.stringify({title,url:current,links},null,2));
+ await writeFile('artifacts/xbz-discovery.json',JSON.stringify({title,url:current,links,productsView},null,2));
  console.log('Diagnóstico concluído; links internos encontrados:',links.length,'(sem credenciais)');
 } finally {await browser.close();}

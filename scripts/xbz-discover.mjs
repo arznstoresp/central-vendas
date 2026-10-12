@@ -22,7 +22,7 @@ try {
  if(/acesso não autorizado|não foi possível entrar|usuário ou senha inválid/i.test(visible))throw Error('Login não autorizado; revise credenciais privadas');
  const links=await page.locator('a[href]').evaluateAll(els=>els.map(a=>({text:(a.innerText||'').trim().slice(0,100),href:a.href})).filter(x=>x.text&&x.href.startsWith('https://minhaxbz.com.br')).slice(0,150));
  // Descoberta estrutural da tela de produtos, sem capturar clientes, pedidos ou segredos.
- const productsMenu=page.locator('a[href]').filter({hasText:/^\\s*PRODUTOS\\s*$/i}).first();
+ const productsMenu=page.locator('a[href]').filter({hasText:/PRODUTOS/i}).first();
  let productsView={found:false,menuMatches:await productsMenu.count(),clickSucceeded:false};
  if(await productsMenu.count()){
    try{

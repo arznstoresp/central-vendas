@@ -53,6 +53,15 @@ try {
      }catch(e){productsView.searchError=String(e.message||e).slice(0,180);}
    }
    productsView.inputs=await page.locator('input').evaluateAll(els=>els.filter(e=>e.type!=='password'&&e.type!=='hidden').map(e=>({type:e.type,name:e.name,id:e.id,placeholder:e.placeholder,ariaLabel:e.getAttribute('aria-label')})).slice(0,35));
+   // Apenas estrutura e amostra limitada de produtos após a pesquisa.
+   // Não captura pedidos, contatos ou tokens.
+   productsView.searchResults={
+     tableRows:await page.locator('table tbody tr').count(),
+     tableHeaders:(await page.locator('table thead th').allTextContents()).map(s=>s.trim()).slice(0,25),
+     sampleRows:await page.locator('table tbody tr').evaluateAll(rows=>rows.slice(0,5).map(row=>row.innerText.trim().slice(0,350))),
+     visibleProductCards:await page.locator('[class*="produto-card"],[class*="product-card"],[data-produto]').count(),
+     paginationLabels:(await page.getByText(/próxima|anterior|página \\d|resultados|itens encontrados/i).allTextContents()).map(s=>s.trim().slice(0,90)).slice(0,12)
+   };
    const headings=await page.locator('h1,h2,h3,h4').allTextContents();
    const buttons=await page.locator('button').evaluateAll(els=>els.map(e=>(e.innerText||e.getAttribute('aria-label')||'').trim().slice(0,60)).filter(Boolean).slice(0,50));
    const tables=await page.locator('table').count();

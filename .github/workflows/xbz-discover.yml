@@ -1,0 +1,27 @@
+name: XBZ - diagnosticar catálogo autenticado
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnosticar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - name: Diagnóstico autenticado
+        run: node scripts/xbz-discover.mjs
+        env:
+          XBZ_USER: ${{ secrets.XBZ_USER }}
+          XBZ_PASSWORD: ${{ secrets.XBZ_PASSWORD }}
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: xbz-discovery
+          path: artifacts/xbz-discovery.json
+          retention-days: 2

@@ -13,14 +13,28 @@ try {
    if(url.hostname!=='www.xbzbrindes.com.br')continue;
    const code=decodeURIComponent(url.pathname.split('/').filter(Boolean).pop()||'').trim();
    if(!/^[0-9]{4,6}[A-Za-z]{0,3}$/.test(code))continue;
-   const text=(a.innerText||'').replace(/\\s+/g,' ').trim();
+   const text=(a.innerText||'').replace(/\s+/g,' ').trim();
    const parent=a.closest('article,li,.produto,.item,.product,.box')||a.parentElement?.parentElement;
-   const name=(parent?.innerText||text).replace(/\\s+/g,' ').trim().replace(new RegExp('^'+code+'\\s*'),'').slice(0,180);
+   const name=(parent?.innerText||text).replace(/\s+/g,' ').trim().replace(new RegExp('^'+code+'\\s*'),'').slice(0,180);
    const img=parent?.querySelector('img')?.getAttribute('src')||a.querySelector('img')?.getAttribute('src')||null;
    if(!found.has(code))found.set(code,{codigo_xbz:code,nome:name||code,link_fornecedor:url.href,imagem_url:img?new URL(img,url.href).href:null});
   }
   return [...found.values()];
  });
+ const publicDiagnostics={
+  url:publicPage.url(),
+  title:await publicPage.title(),
+  anchors:await publicPage.locator('a[href]').count(),
+  candidateLinks:await publicPage.locator('a[href]').evaluateAll(els=>els.filter(a=>/produto|brinde|catalog|item/i.test(a.href)).slice(0,30).map(a=>({text:(a.innerText||'').trim().slice(0,90),path:new URL(a.href).pathname}))),
+  visibleText:(await publicPage.locator('body').innerText()).slice(0,1800)
+ };
+ await mkdir('artifacts',{recursive:true});
+ await writeFile('artifacts/xbz-public-diagnostics.json',JSON.stringify(publicDiagnostics,null,2));
+ if(catalog.length===0){
+  await writeFile('artifacts/xbz-public-catalog.json',JSON.stringify({count:0,products:[]},null,2));
+  console.log('No public products detected. Inspect xbz-public-diagnostics.json');
+  process.exitCode=1;
+ }else{
  const user=process.env.XBZ_USER,pass=process.env.XBZ_PASSWORD;
  if(!user||!pass)throw Error('Missing XBZ_USER / XBZ_PASSWORD');
  const page=await browser.newPage();
@@ -53,4 +67,6 @@ try {
  await writeFile('artifacts/xbz-public-catalog.json',JSON.stringify({count:catalog.length,products:catalog},null,2));
  await writeFile('artifacts/xbz-crosscheck.json',JSON.stringify({searched:results.length,results},null,2));
  console.log('Public catalog:',catalog.length,'Authenticated searches:',results.length);
+ } // public products found
+
 }finally{await browser.close();}

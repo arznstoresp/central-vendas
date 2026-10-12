@@ -34,6 +34,25 @@ try {
      try{await productsMenu.evaluate(el=>el.click());productsView.clickSucceeded=true;}catch{}
    }
    await page.waitForTimeout(3000);
+   // XBZ exige quantidade mínima 1 para pesquisar. Não conclui pedidos.
+   const quantityCandidates=page.locator('input[name*="quant" i],input[id*="quant" i],input[placeholder*="quant" i],input[aria-label*="quant" i]');
+   const quantityLabels=page.getByLabel(/quantidade/i);
+   const quantity=await quantityCandidates.count()?quantityCandidates.first():quantityLabels.first();
+   productsView.quantityFieldFound=(await quantity.count())>0;
+   productsView.quantitySet=false;
+   productsView.searchClicked=false;
+   if(productsView.quantityFieldFound){
+     try{
+       await quantity.fill('1',{timeout:7000});
+       productsView.quantitySet=true;
+       const searchButton=page.getByRole('button',{name:/pesquisar|buscar/i}).first();
+       const searchInput=page.locator('input[type="submit"][value*="pesquis" i],input[type="button"][value*="pesquis" i]').first();
+       if(await searchButton.count()){await searchButton.click({timeout:9000});productsView.searchClicked=true;}
+       else if(await searchInput.count()){await searchInput.click({timeout:9000});productsView.searchClicked=true;}
+       if(productsView.searchClicked)await page.waitForTimeout(2500);
+     }catch(e){productsView.searchError=String(e.message||e).slice(0,180);}
+   }
+   productsView.inputs=await page.locator('input').evaluateAll(els=>els.filter(e=>e.type!=='password'&&e.type!=='hidden').map(e=>({type:e.type,name:e.name,id:e.id,placeholder:e.placeholder,ariaLabel:e.getAttribute('aria-label')})).slice(0,35));
    const headings=await page.locator('h1,h2,h3,h4').allTextContents();
    const buttons=await page.locator('button').evaluateAll(els=>els.map(e=>(e.innerText||e.getAttribute('aria-label')||'').trim().slice(0,60)).filter(Boolean).slice(0,50));
    const tables=await page.locator('table').count();

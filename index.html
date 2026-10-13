@@ -948,8 +948,8 @@ input:hover,textarea:hover{border-color:var(--line-2)}
         <div class="card-title"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="dollar-sign" aria-hidden="true" style="width:12px;height:12px" class="lucide lucide-dollar-sign"><line x1="12" x2="12" y1="2" y2="22"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>Preços e Custos por Produto</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Os valores são salvos no dispositivo e usados na mensagem da proposta quando ativado.</div>
         <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
-          <button class="btn" style="gap:6px;font-size:12px;background:var(--bg2);border:1px solid var(--border)" onclick="syncXbzPrices(true)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="refresh-cw" aria-hidden="true" style="width:13px;height:13px" class="lucide lucide-refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>Atualizar Preços XBZ</button>
-          <span id="xbzSyncLabel" style="font-size:11px;color:var(--muted)">Última sync: 08/10, 21:27</span>
+          <button class="btn" style="gap:6px;font-size:12px;background:var(--bg2);border:1px solid var(--border)" onclick="syncXbzPrices(true)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="refresh-cw" aria-hidden="true" style="width:13px;height:13px" class="lucide lucide-refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>Consultar status XBZ</button>
+          <span id="xbzSyncLabel" style="font-size:11px;color:var(--muted)">XBZ: consulta automática indisponível</span>
         </div>
         <div id="adminCustoList" class="stack"></div>
         <button class="btn btn-primary" style="margin-top:12px;gap:6px" onclick="savePrecos()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="save" aria-hidden="true" style="width:14px;height:14px" class="lucide lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg>Salvar todos os preços</button>
@@ -1516,35 +1516,12 @@ function setSyncStatus(state){
 }
 
 async function syncXbzPrices(showToast){
-  if(!sb || !AUTH_USER){ if(showToast) toast('Faça login para sincronizar preços','err'); return; }
-  try{
-    var r=await sb.from('precos_xbz').select('codigo_xbz,preco,disponivel').eq('disponivel','SIM');
-    if(r.error){ if(showToast) toast('Erro ao buscar preços XBZ','err'); return; }
-    // Build map: codigoXbz -> lowest preco where disponivel=SIM
-    var map={};
-    (r.data||[]).forEach(function(row){
-      var c=row.codigo_xbz; var p=parseFloat(row.preco)||0;
-      if(!map[c] || p < map[c]) map[c]=p;
-    });
-    var updated=0;
-    var precos=JSON.parse(localStorage.getItem('cv_precos')||'{}');
-    PRODUTOS.forEach(function(prod){
-      if(prod.codigoXbz && map[prod.codigoXbz]){
-        var novoCI=map[prod.codigoXbz];
-        prod.custoInterno=novoCI;
-        if(!precos[prod.id]) precos[prod.id]={ci:0,cp:0,mg:0,pv:0};
-        precos[prod.id].ci=novoCI;
-        updated++;
-      }
-    });
-    localStorage.setItem('cv_precos',JSON.stringify(precos));
-    var now=new Date().toISOString();
-    localStorage.setItem('cv_xbz_sync',now);
-    var lbl=document.getElementById('xbzSyncLabel');
-    if(lbl) lbl.textContent='Última sync: '+new Date(now).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-    if(showToast) toast('Preços XBZ atualizados: '+updated+' produtos ✓','ok');
-    console.log('[XBZ] Preços sincronizados:',updated,'produtos');
-  }catch(e){ console.warn('syncXbzPrices error',e); if(showToast) toast('Falha ao sincronizar XBZ','err'); }
+  // There is no authenticated supplier integration yet. Never mark a read of
+  // precos_xbz as a fresh supplier consultation or copy unverified costs.
+  var lbl=document.getElementById('xbzSyncLabel');
+  if(lbl) lbl.textContent='XBZ: consulta automática indisponível — confirmar custos no fornecedor';
+  if(showToast) toast('Sem conexão direta com Minha XBZ. Confirme preço e estoque no fornecedor.','err');
+  return false;
 }
 
 // ====================== STATE ======================

@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "buildCommand": "mkdir -p dist && cp index.html dist/index.html && cp -R data dist/data && cp -R public/. dist/",
+  "outputDirectory": "dist",
+  "framework": null
+}

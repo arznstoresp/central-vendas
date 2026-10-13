@@ -20,8 +20,8 @@ test('public XBZ catalog includes at least 100 unique supplier models',()=>{
  const models=JSON.parse(source.slice(source.indexOf('['),source.lastIndexOf(']')+1));
  assert.ok(models.length>=100,'expected 100 distinct models');
  assert.equal(new Set(models.map(x=>x.codigo)).size,models.length);
- assert.ok(models.every(x=>/^\\d{4,6}[A-Z0-9]*$/.test(x.codigo)&&x.nome));
- assert.match(html,/data\\/xbz-public-models\\.js/);
- assert.match(html,/window\\.XBZ_PUBLIC_MODELS/);
+ assert.ok(models.every(x=>/^[0-9]{4,6}[A-Z0-9]*$/.test(x.codigo)&&x.nome));
+ assert.ok(html.includes('data/xbz-public-models.js'));
+ assert.ok(html.includes('window.XBZ_PUBLIC_MODELS'));
  assert.match(html,/custoInterno:''/);
 });

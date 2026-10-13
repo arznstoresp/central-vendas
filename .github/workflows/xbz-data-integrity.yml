@@ -4,6 +4,8 @@ on:
     paths:
       - 'scripts/xbz-verified-data.mjs'
       - 'scripts/xbz-verified-data.test.mjs'
+      - 'scripts/xbz-ui-safety.test.mjs'
+      - 'index.html'
       - '.github/workflows/xbz-data-integrity.yml'
   pull_request:
     paths:
@@ -22,4 +24,4 @@ jobs:
         with:
           node-version: '22'
       - name: Validate XBZ supplier data rules
-        run: node --test scripts/xbz-verified-data.test.mjs
+        run: node --test scripts/xbz-verified-data.test.mjs scripts/xbz-ui-safety.test.mjs

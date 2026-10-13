@@ -1,0 +1,27 @@
+name: XBZ - Validar integridade dos dados
+on:
+  push:
+    paths:
+      - 'scripts/xbz-verified-data.mjs'
+      - 'scripts/xbz-verified-data.test.mjs'
+      - 'scripts/xbz-ui-safety.test.mjs'
+      - 'index.html'
+      - '.github/workflows/xbz-data-integrity.yml'
+  pull_request:
+    paths:
+      - 'scripts/xbz-verified-data.mjs'
+      - 'scripts/xbz-verified-data.test.mjs'
+      - '.github/workflows/xbz-data-integrity.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate XBZ supplier data rules
+        run: node --test scripts/xbz-verified-data.test.mjs scripts/xbz-ui-safety.test.mjs

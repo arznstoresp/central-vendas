@@ -2089,6 +2089,9 @@ function overrideTier(id,tier,val){
 }
 function getPrecoTier(p,qty){
   if(!p) return 0;
+  // Precos XBZ exigem confirmacao explicita do custo e das condicoes comerciais.
+  // Valores antigos no navegador ou no banco nao autorizam cotacao automatica.
+  if(p.codigoXbz && p.precoVerificado !== true) return 0;
   if(qty>=1000) return p.precoTier3||p.precoTier2||p.precoTier1||p.precoFinal||0;
   if(qty>=101)  return p.precoTier2||p.precoTier1||p.precoFinal||0;
   return p.precoTier1||p.precoFinal||0;
@@ -2434,7 +2437,7 @@ function schedulePreview(){
         } else if(modo==='apartir' && preco>0 && cart.indexOf(p)===0){
           precoStr=' (a partir de R$ '+preco.toFixed(2).replace('.',',')+')';
         }
-        lines.push('✅ *'+pObj.nome+'*'+precoStr);
+        lines.push('✅ *'+pObj.nome+'*'+precoStr+(modo!=='nao' && !preco?' — *Sob consulta*':''));
         if(pObj.minQty) lines.push('   📦 Qtd mínima: '+pObj.minQty+' unidades');
       });
     }
@@ -2499,7 +2502,7 @@ function gerarMensagem(){
       if(preco>0 && preco<minPreco) minPreco=preco;
       var precoStr='';
       if(modo==='por-produto' && preco>0) precoStr=' — *R$ '+preco.toFixed(2).replace('.',',')+'/un*';
-      lines.push('✅ *'+pObj.nome+'*'+precoStr);
+      lines.push('✅ *'+pObj.nome+'*'+precoStr+(modo!=='nao' && !preco?' — *Sob consulta*':''));
       if(pObj.minQty) lines.push('   📦 Mínimo: '+pObj.minQty+' unidades');
     });
     if(modo==='apartir' && minPreco<Infinity){
@@ -2627,7 +2630,7 @@ function gerarPDFDireto(){
       var pObj=PRODUTOS.find(function(x){return x.id===p.id;});
       if(!pObj) return null;
       var preco=getPrecoTier(pObj,50);
-      var precoStr=(modo!=='nao'&&preco>0)?'R$ '+preco.toFixed(2).replace('.',','):'-';
+      var precoStr=(modo==='nao')?'-':(preco>0?'R$ '+preco.toFixed(2).replace('.',','):'Sob consulta');
       return [pObj.nome, pObj.cat||'-', (pObj.minQty||1)+' un', precoStr];
     }).filter(Boolean);
 

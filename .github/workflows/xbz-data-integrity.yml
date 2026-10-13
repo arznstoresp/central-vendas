@@ -9,6 +9,10 @@ on:
       - '.github/workflows/xbz-data-integrity.yml'
   pull_request:
     paths:
+      - 'index.html'
+      - 'data/xbz-public-models.js'
+      - 'public/img/xbz/**'
+      - 'scripts/xbz-ui-safety.test.mjs'
       - 'scripts/xbz-verified-data.mjs'
       - 'scripts/xbz-verified-data.test.mjs'
       - '.github/workflows/xbz-data-integrity.yml'

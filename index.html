@@ -1096,7 +1096,7 @@ window.PRODUTOS = PRODUTOS;
     PRODUTOS.push({
       id:'xbz_public_'+code,nome:name,sku:'XBZ-'+code,codigoXbz:code,
       cat:'Catálogo XBZ',desc:'Modelo do catálogo público XBZ. Cores, estoque, mínimo e valores sob consulta.',
-      imagem:'',linkFornecedor:'https://www.xbzbrindes.com.br/'+encodeURIComponent(code),
+      imagem:p.imagem||'',linkFornecedor:'https://www.xbzbrindes.com.br/'+encodeURIComponent(code),
       fornecedor:'XBZ Brindes',minQtd:'Sob consulta',prazo:'Sob consulta',
       custoInterno:'',precoBase:'',margem:'',status:'catalogo',
       visivelVendedor:true,observacaoInterna:'Produto cadastrado a partir do catálogo público; fotografia e condições comerciais aguardam validação.'

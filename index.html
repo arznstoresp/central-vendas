@@ -1088,9 +1088,16 @@ window.PRODUTOS = PRODUTOS;
 // Mantém os produtos já cadastrados e evita duplicação pelo código do fornecedor.
 (function(){
   var existing=new Set(PRODUTOS.map(function(p){return String(p.codigoXbz||'').trim().toUpperCase();}).filter(Boolean));
+  var byCode=new Map(PRODUTOS.filter(function(p){return p.codigoXbz;}).map(function(p){return [String(p.codigoXbz).trim().toUpperCase(),p];}));
   (window.XBZ_PUBLIC_MODELS||[]).forEach(function(p){
     var code=String(p.codigo||'').trim().toUpperCase();
-    if(!/^[0-9]{4,6}[A-Z0-9]*$/.test(code)||existing.has(code))return;
+    if(!/^[0-9]{4,6}[A-Z0-9]*$/.test(code))return;
+    // Apply verified supplier photo to legacy models without creating duplicates.
+    if(existing.has(code)){
+      var legacy=byCode.get(code);
+      if(legacy && p.imagem) legacy.imagem=p.imagem;
+      return;
+    }
     var name=String(p.nome||'').trim();
     if(!name)return;
     PRODUTOS.push({

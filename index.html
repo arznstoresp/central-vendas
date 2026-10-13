@@ -1156,40 +1156,99 @@ async function loadXbzCatalog(){
   }catch(err){console.warn('[Catálogo XBZ] Erro inesperado:',err);}
 }
 
-/* Preços XBZ: carrega precos_xbz e atualiza PRODUTOS com preço mínimo e disponibilidade. */
+/* Preços XBZ: carrega precos_xbz e atualiza PRODUTOS com todas as variantes e status agregado.
+   Regras críticas:
+   - Nunca exibe R$ 0,00 — preco=0 nunca é preço válido
+   - Preserva todas as variantes (codigo_variante) no produto
+   - Status agregado: preco_confirmado / sob_consulta / indisponivel / misto / pendente_auditoria
+   - disponivel='CONSULTE' (ou SIM+preco=0+texto=CONSULTE) → sob_consulta, nunca confirmado
+*/
 var _xbzPricesLoaded=false;
 async function loadXbzPrices(){
   if(!sb||!AUTH_USER)return;
   try{
-    var response=await sb.from('precos_xbz').select('codigo_xbz,preco,disponivel,venda_minima').order('preco',{ascending:true});
+    /* Selecionar TODOS os campos relevantes; sem filtro — preservar todas as variantes */
+    var response=await sb.from('precos_xbz')
+      .select('codigo_variante,codigo_xbz,sku,disponivel,preco,preco_texto,venda_minima')
+      .order('preco',{ascending:true});
     if(response.error){console.warn('[Preços XBZ] Falha de leitura:',response.error.message);return;}
-    /* Agrupar: menor preço disponível por codigo_xbz */
+
+    /* Agrupar variantes por codigo_xbz, preservando todos os campos */
     var map={};
     (response.data||[]).forEach(function(r){
       var c=String(r.codigo_xbz||'').trim(); if(!c) return;
-      if(!map[c]) map[c]={preco:null,disponivel:'CONSULTE',venda_minima:null};
-      /* Prioridade: disponível com menor preço */
-      if(r.disponivel==='SIM' && r.preco!=null){
-        if(map[c].preco===null||r.preco<map[c].preco){
-          map[c].preco=r.preco; map[c].disponivel='SIM'; map[c].venda_minima=r.venda_minima;
+      if(!map[c]) map[c]={variantes:[],precoMin:null,vendaMinMin:null};
+      map[c].variantes.push({
+        codigo_variante: r.codigo_variante,
+        sku:             r.sku,
+        disponivel:      r.disponivel,
+        preco:           r.preco,
+        preco_texto:     r.preco_texto,
+        venda_minima:    r.venda_minima
+      });
+      /* Rastrear menor preço REAL (>0) de variantes SIM */
+      var precoReal=(r.preco!=null && Number(r.preco)>0)? Number(r.preco):null;
+      if(r.disponivel==='SIM' && precoReal!==null){
+        if(map[c].precoMin===null||precoReal<map[c].precoMin){
+          map[c].precoMin=precoReal;
+          map[c].vendaMinMin=r.venda_minima;
         }
-      } else if(map[c].disponivel!=='SIM'){
-        map[c].disponivel=r.disponivel||'CONSULTE';
-        if(map[c].preco===null && r.preco!=null) map[c].preco=r.preco;
       }
     });
+
+    /* Calcular xbzStatus por produto a partir das variantes */
+    function calcXbzStatus(variantes){
+      var temConf=false,temCons=false,temIndisp=false;
+      variantes.forEach(function(v){
+        var disp=String(v.disponivel||'').trim();
+        var precoReal=v.preco!=null && Number(v.preco)>0;
+        var textoConsulte=String(v.preco_texto||'').indexOf('CONSULTE')>=0;
+        if(disp.indexOf('INDISPON')>=0){
+          temIndisp=true;
+        } else if(disp.indexOf('CONSULTE')>=0){
+          temCons=true;
+        } else if(disp==='SIM'){
+          if(precoReal){ temConf=true; }
+          else if(textoConsulte){ temCons=true; } /* SIM+preco=0+texto=CONSULTE → consulta */
+        }
+      });
+      if(temConf && !temCons && !temIndisp) return 'preco_confirmado';
+      if(temCons && !temConf && !temIndisp) return 'sob_consulta';
+      if(temIndisp && !temConf && !temCons)  return 'indisponivel';
+      if(temIndisp || (temConf && temCons))  return 'misto';
+      return 'pendente_auditoria';
+    }
+
     /* Injetar em PRODUTOS */
     var updated=0;
     PRODUTOS.forEach(function(p){
       var c=String(p.codigoXbz||'').trim(); if(!c) return;
       var info=map[c]; if(!info) return;
-      if(info.preco!=null) p.precoBase=info.preco.toFixed(2).replace('.',',');
-      if(info.disponivel) p.disponibilidade=info.disponivel;
-      if(info.venda_minima) p.minQtd=info.venda_minima;
+
+      var status=calcXbzStatus(info.variantes);
+      p.xbzStatus    = status;
+      p.xbzVariantes = info.variantes; /* mapa completo; frontend pode iterar */
+
+      /* precoBase: apenas quando há preço real (>0) e produto está disponível/misto */
+      if(info.precoMin!==null && status!=='indisponivel' && status!=='pendente_auditoria'){
+        p.precoBase=info.precoMin.toFixed(2).replace('.',',');
+      }
+
+      /* disponibilidade legível */
+      if(status==='preco_confirmado')  p.disponibilidade='SIM';
+      else if(status==='sob_consulta') p.disponibilidade='CONSULTE';
+      else if(status==='indisponivel') p.disponibilidade='INDISPONÍVEL';
+      else if(status==='misto')        p.disponibilidade='MISTO';
+      else                             p.disponibilidade='CONSULTE';
+
+      /* venda mínima do menor preço confirmado */
+      if(info.vendaMinMin!=null) p.minQtd=info.vendaMinMin;
+
       updated++;
     });
     _xbzPricesLoaded=true;
-    console.info('[Preços XBZ] Produtos atualizados com preço/disponibilidade:',updated);
+    console.info('[Preços XBZ] Produtos atualizados:',updated,'| status map salvo em window._xbzMap');
+    window._xbzMap=map; /* debug/acesso externo */
     if(typeof renderCatalog==='function') renderCatalog();
   }catch(err){console.warn('[Preços XBZ] Erro inesperado:',err);}
 }

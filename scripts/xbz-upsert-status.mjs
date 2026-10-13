@@ -93,6 +93,12 @@ async function main() {
   }
   console.log(`  ${'TOTAL'.padEnd(22)}: ${upsert.length}`);
 
+  const DRY_RUN = process.env.DRY_RUN === 'true';
+  if (DRY_RUN) {
+    console.log('\n[DRY RUN] Upsert NÃO executado. Contagem acima é o que seria gravado.');
+    return;
+  }
+
   console.log('\nExecutando upsert em produtos_xbz (campo status)...');
   // Upsert em lotes de 50 para evitar timeout
   const BATCH = 50;

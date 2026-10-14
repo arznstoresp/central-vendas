@@ -1,0 +1,24 @@
+/* ARZN visual refresh — presentation only; no business logic changes */
+:root{--bg:#0c0d0f;--surface:#15171b;--surface2:#1c1f24;--surface3:#262a30;--border:rgba(255,255,255,.09);--border2:rgba(255,255,255,.17);--text:#f5f6f7;--muted:#adb2bc;--dim:#858c98;--orange:#ff7900;--orange2:#e66d00;--orange-lo:rgba(255,121,0,.10);--orange-mid:rgba(255,121,0,.22);--r:14px}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(ellipse at 90% -20%,rgba(255,121,0,.07),transparent 55%),var(--bg)}
+button,a,input,select,textarea{transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease,color .18s ease}
+button:not(:disabled){cursor:pointer}
+button:not(:disabled):active{transform:scale(.985)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+input,select,textarea{background-color:#111317;border-color:var(--border2);border-radius:10px}
+input:focus,select:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-lo)}
+.nav-btn{border-radius:11px}
+.nav-btn:hover{background:var(--orange-lo);color:var(--text)}
+.prod-card,.day-card,.script-card,.seg-card{border-radius:14px;transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease}
+.prod-card:hover,.day-card:hover,.script-card:hover,.seg-card:hover{border-color:rgba(255,121,0,.4);box-shadow:0 8px 26px rgba(0,0,0,.16)}
+.prod-card img{object-fit:contain}
+table{border-collapse:separate;border-spacing:0}
+thead{background:var(--surface2)}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#41454d;border-radius:12px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#ff7900}
+::selection{background:rgba(255,121,0,.3);color:#fff}
+@media(max-width:768px){button,input,select,textarea{min-height:40px}.prod-card,.day-card,.script-card,.seg-card{border-radius:12px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
